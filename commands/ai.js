@@ -83,8 +83,18 @@ async function aiCommand(sock, chatId, message) {
             }
         } catch (error) {
             console.error('Erro na IA:', error);
+            let errorMessage = "❌ Falha ao obter resposta da IA.";
+            
+            if (error.message.includes('403')) {
+                errorMessage = "❌ Erro 403: Sua chave do Gemini pode estar incorreta ou sem permissão.";
+            } else if (error.message.includes('429')) {
+                errorMessage = "❌ Erro 429: Limite de uso da API atingido. Tente novamente em alguns minutos.";
+            } else if (error.message.includes('400')) {
+                errorMessage = "❌ Erro 400: Requisição inválida. Verifique o formato da pergunta.";
+            }
+            
             await sock.sendMessage(chatId, {
-                text: "❌ Falha ao obter resposta. Por favor, tente novamente mais tarde.",
+                text: `${errorMessage}\n\nDetalhe: ${error.message}`,
                 quoted: message
             });
         }
