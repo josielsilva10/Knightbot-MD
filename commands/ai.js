@@ -63,9 +63,9 @@ async function aiCommand(sock, chatId, message) {
                 }
                 throw new Error('Todas as APIs do GPT falharam');
             } else if (command === '.gemini') {
-                // Se o usuário configurou uma chave própria, usa a API oficial
+                // Usando Gemini 1.5 Flash (mais rápido e estável)
                 if (settings.geminiApiKey && settings.geminiApiKey !== 'SUA_CHAVE_GEMINI_AQUI') {
-                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${settings.geminiApiKey}`, {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${settings.geminiApiKey}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -78,6 +78,8 @@ async function aiCommand(sock, chatId, message) {
                         const answer = data.candidates[0].content.parts[0].text;
                         await sock.sendMessage(chatId, { text: answer }, { quoted: message });
                         return;
+                    } else if (data.error) {
+                        throw new Error(`Google AI Error: ${data.error.message}`);
                     }
                 }
 
