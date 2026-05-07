@@ -9,6 +9,7 @@
  * - Biblioteca Baileys por @adiwajshing
  * - Implementação do Pair Code inspirada por TechGod143 & DGXEON
  */
+require('dotenv').config();
 require('./settings')
 const { Boom } = require('@hapi/boom')
 const fs = require('fs')

@@ -43,6 +43,19 @@ npm install
     *   `botOwner`: Seu nome ou o nome do proprietário do bot.
     *   `prefix`: O prefixo dos comandos (geralmente `.` ou `!`).
 
+### Passo 2.4: Configurar Chaves de API (Segurança)
+
+Para usar comandos de Inteligência Artificial (como o Gemini), você deve usar um arquivo `.env` para manter suas chaves seguras e privadas:
+
+1.  Na pasta raiz do bot, crie um arquivo chamado `.env`.
+2.  Adicione sua chave do Gemini assim:
+    ```env
+    GEMINI_API_KEY=sua_chave_aqui
+    ```
+3.  Instale o suporte necessário: `npm install dotenv`
+
+Dessa forma, sua chave ficará salva apenas no seu computador e não será enviada para o GitHub.
+
 ## 3. Iniciando o Bot
 
 Para ligar o bot, execute o seguinte comando no Terminal/Prompt de Comando, dentro da pasta `Knightbot-MD`:
