@@ -39,15 +39,20 @@ async function aiCommand(sock, chatId, message) {
                 for (const api of apis) {
                     try {
                         let response;
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 segundos de timeout
+
                         if (api.method === 'POST') {
                             response = await fetch(api.url, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                                body: api.body
+                                body: api.body,
+                                signal: controller.signal
                             });
                         } else {
-                            response = await fetch(api.url);
+                            response = await fetch(api.url, { signal: controller.signal });
                         }
+                        clearTimeout(timeoutId);
                         const data = await response.json();
                         const answer = data[api.path] || data.result || data.answer || data.message || data.data;
                         if (answer) {
