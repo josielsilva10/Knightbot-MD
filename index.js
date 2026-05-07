@@ -79,14 +79,9 @@ const pairingCode = true // Forçar Pairing Code para evitar problemas visuais c
 const useMobile = process.argv.includes("--mobile")
 
 // Só cria interface readline se estivermos em ambiente interativo
-const rl = process.stdin.isTTY ? readline.createInterface({ input: process.stdin, output: process.stdout }) : null
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const question = (text) => {
-    if (rl) {
-        return new Promise((resolve) => rl.question(text, resolve))
-    } else {
-        // Em ambiente não interativo, usa ownerNumber das configurações
-        return Promise.resolve(settings.ownerNumber || phoneNumber)
-    }
+    return new Promise((resolve) => rl.question(text, resolve))
 }
 
 
