@@ -5,7 +5,7 @@ const settings = {
   botOwner: 'Josiel DEV', // Seu nome
   ownerNumber: '5589981109051', // Defina seu número aqui sem o símbolo +, apenas código do país e número sem espaços
   giphyApiKey: 'qnl7ssQChTdPjsKta2Ax2LMaGXz303tq',
-  geminiApiKey: process.env.GEMINI_API_KEY || 'SUA_CHAVE_AQUI', // Recomenda-se usar arquivo .env para segurança
+  geminiApiKey: process.env.GEMINI_API_KEY || 'AIzaSyBG--5apwiIautGGJzN5M1dhGLxWx1AB2w', // Se o .env falhar, usa esta (troque se necessário)
   commandMode: "public",
   maxStoreMessages: 20, 
   storeWriteInterval: 10000,
