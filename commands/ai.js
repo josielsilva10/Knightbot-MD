@@ -30,18 +30,25 @@ async function aiCommand(sock, chatId, message) {
             });
 
             if (command === '.gpt') {
-                const response = await axios.get(`https://zellapi.autos/ai/chatbot?text=${encodeURIComponent(query)}`);
-                
-                if (response.data && response.data.status && response.data.result) {
-                    const answer = response.data.result;
-                    await sock.sendMessage(chatId, {
-                        text: answer
-                    }, {
-                        quoted: message
-                    });
-                } else {
-                    throw new Error('Falha na API GPT gratuita');
+                // Nova API do ChatGPT mais estável
+                const apis = [
+                    `https://api.siputzx.my.id/api/ai/gpt3?content=${encodeURIComponent(query)}`,
+                    `https://api.ryzendesu.vip/api/ai/chatgpt?text=${encodeURIComponent(query)}`,
+                    `https://zellapi.autos/ai/chatbot?text=${encodeURIComponent(query)}`
+                ];
+
+                for (const api of apis) {
+                    try {
+                        const response = await fetch(api);
+                        const data = await response.json();
+                        const answer = data.result || data.answer || data.message || data.data;
+                        if (answer) {
+                            await sock.sendMessage(chatId, { text: answer }, { quoted: message });
+                            return;
+                        }
+                    } catch (e) { continue; }
                 }
+                throw new Error('Todas as APIs do GPT falharam');
             } else if (command === '.gemini') {
                 // Se o usuário configurou uma chave própria, usa a API oficial
                 if (settings.geminiApiKey && settings.geminiApiKey !== 'SUA_CHAVE_GEMINI_AQUI') {
