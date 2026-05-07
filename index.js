@@ -75,13 +75,17 @@ let owner = JSON.parse(fs.readFileSync('./data/owner.json'))
 
 global.botname = "KNIGHT BOT"
 global.themeemoji = "•"
-const pairingCode = true // Forçar Pairing Code para evitar problemas visuais com QR Code
+const pairingCode = process.argv.includes("--pairing-code")
 const useMobile = process.argv.includes("--mobile")
 
 // Só cria interface readline se estivermos em ambiente interativo
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
+const rl = process.stdin.isTTY ? readline.createInterface({ input: process.stdin, output: process.stdout }) : null
 const question = (text) => {
-    return new Promise((resolve) => rl.question(text, resolve))
+    if (rl) {
+        return new Promise((resolve) => rl.question(text, resolve))
+    } else {
+        return Promise.resolve(settings.ownerNumber || phoneNumber)
+    }
 }
 
 
