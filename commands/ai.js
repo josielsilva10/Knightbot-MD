@@ -29,8 +29,32 @@ async function aiCommand(sock, chatId, message) {
                 react: { text: '🤖', key: message.key }
             });
 
-            if (command === '.gpt') {
-                // Nova API do ChatGPT mais estável
+            if (command === '.gpt' || command === '.ia') {
+                // Prioridade: Groq (Mais estável e rápida)
+                if (settings.groqApiKey && settings.groqApiKey !== 'SUA_CHAVE_AQUI') {
+                    try {
+                        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${settings.groqApiKey}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                model: 'llama3-8b-8192',
+                                messages: [
+                                    { role: 'system', content: 'Você é o Cavaleiro Bot, um assistente prestativo e amigável. Responda sempre em Português do Brasil.' },
+                                    { role: 'user', content: query }
+                                ]
+                            })
+                        });
+                        const data = await response.json();
+                        if (data.choices && data.choices[0].message.content) {
+                            return await sock.sendMessage(chatId, { text: data.choices[0].message.content }, { quoted: message });
+                        }
+                    } catch (e) { console.error('Erro Groq:', e); }
+                }
+
+                // Backup: APIs Gratuitas
                 const apis = [
                     { url: `https://api.popcat.xyz/chatbot?msg=${encodeURIComponent(query)}&name=KnightBot&owner=Josiel`, path: 'response' },
                     { url: `https://api.simsimi.vn/v1/simtalk`, method: 'POST', body: `text=${encodeURIComponent(query)}&lc=pt`, path: 'message' }
@@ -39,29 +63,23 @@ async function aiCommand(sock, chatId, message) {
                 for (const api of apis) {
                     try {
                         let response;
-                        const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 segundos de timeout
-
                         if (api.method === 'POST') {
                             response = await fetch(api.url, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                                body: api.body,
-                                signal: controller.signal
+                                body: api.body
                             });
                         } else {
-                            response = await fetch(api.url, { signal: controller.signal });
+                            response = await fetch(api.url);
                         }
-                        clearTimeout(timeoutId);
                         const data = await response.json();
                         const answer = data[api.path] || data.result || data.answer || data.message || data.data;
                         if (answer) {
-                            await sock.sendMessage(chatId, { text: answer }, { quoted: message });
-                            return;
+                            return await sock.sendMessage(chatId, { text: answer }, { quoted: message });
                         }
                     } catch (e) { continue; }
                 }
-                throw new Error('Todas as APIs do GPT falharam');
+                throw new Error('Todas as APIs de IA falharam');
             } else if (command === '.gemini') {
                 // Usando Gemini 1.5 Flash (mais rápido e estável)
                 if (settings.geminiApiKey && settings.geminiApiKey !== 'SUA_CHAVE_GEMINI_AQUI') {
