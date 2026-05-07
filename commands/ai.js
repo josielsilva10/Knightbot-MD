@@ -32,15 +32,22 @@ async function aiCommand(sock, chatId, message) {
             if (command === '.gpt') {
                 // Nova API do ChatGPT mais estável
                 const apis = [
-                    { url: `https://api.shizuhub.xyz/api/ai/chatgpt?text=${encodeURIComponent(query)}`, path: 'result' },
-                    { url: `https://api.vreden.my.id/api/gpt-4?query=${encodeURIComponent(query)}`, path: 'result' },
-                    { url: `https://api.yanzgpt.my.id/chat?query=${encodeURIComponent(query)}`, path: 'answer' },
-                    { url: `https://api.ryzendesu.vip/api/ai/chatgpt?text=${encodeURIComponent(query)}`, path: 'result' }
+                    { url: `https://api.popcat.xyz/chatbot?msg=${encodeURIComponent(query)}&name=KnightBot&owner=Josiel`, path: 'response' },
+                    { url: `https://api.simsimi.vn/v1/simtalk`, method: 'POST', body: `text=${encodeURIComponent(query)}&lc=pt`, path: 'message' }
                 ];
 
                 for (const api of apis) {
                     try {
-                        const response = await fetch(api.url);
+                        let response;
+                        if (api.method === 'POST') {
+                            response = await fetch(api.url, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                body: api.body
+                            });
+                        } else {
+                            response = await fetch(api.url);
+                        }
                         const data = await response.json();
                         const answer = data[api.path] || data.result || data.answer || data.message || data.data;
                         if (answer) {
