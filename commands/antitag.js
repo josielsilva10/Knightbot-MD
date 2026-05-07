@@ -4,7 +4,7 @@ const isAdmin = require('../lib/isAdmin');
 async function handleAntitagCommand(sock, chatId, userMessage, senderId, isSenderAdmin, message) {
     try {
         if (!isSenderAdmin) {
-            await sock.sendMessage(chatId, { text: '```For Group Admins Only!```' },{quoted :message});
+            await sock.sendMessage(chatId, { text: '```Apenas para administradores do grupo!```' },{quoted :message});
             return;
         }
 
@@ -13,7 +13,7 @@ async function handleAntitagCommand(sock, chatId, userMessage, senderId, isSende
         const action = args[0];
 
         if (!action) {
-            const usage = `\`\`\`ANTITAG SETUP\n\n${prefix}antitag on\n${prefix}antitag set delete | kick\n${prefix}antitag off\n\`\`\``;
+            const usage = `\`\`\`CONFIGURAÇÃO ANTITAG\n\n${prefix}antitag on\n${prefix}antitag set delete | kick\n${prefix}antitag off\n\`\`\``;
             await sock.sendMessage(chatId, { text: usage },{quoted :message});
             return;
         }
@@ -22,37 +22,37 @@ async function handleAntitagCommand(sock, chatId, userMessage, senderId, isSende
             case 'on':
                 const existingConfig = await getAntitag(chatId, 'on');
                 if (existingConfig?.enabled) {
-                    await sock.sendMessage(chatId, { text: '*_Antitag is already on_*' },{quoted :message});
+                    await sock.sendMessage(chatId, { text: '*_Antitag já está ativado_*' },{quoted :message});
                     return;
                 }
                 const result = await setAntitag(chatId, 'on', 'delete');
                 await sock.sendMessage(chatId, { 
-                    text: result ? '*_Antitag has been turned ON_*' : '*_Failed to turn on Antitag_*' 
+                    text: result ? '*_Antitag foi ATIVADO_*' : '*_Falha ao ativar o Antitag_*' 
                 },{quoted :message});
                 break;
 
             case 'off':
                 await removeAntitag(chatId, 'on');
-                await sock.sendMessage(chatId, { text: '*_Antitag has been turned OFF_*' },{quoted :message});
+                await sock.sendMessage(chatId, { text: '*_Antitag foi DESATIVADO_*' },{quoted :message});
                 break;
 
             case 'set':
                 if (args.length < 2) {
                     await sock.sendMessage(chatId, { 
-                        text: `*_Please specify an action: ${prefix}antitag set delete | kick_*` 
+                        text: `*_Por favor, especifique uma ação: ${prefix}antitag set delete | kick_*` 
                     },{quoted :message});
                     return;
                 }
                 const setAction = args[1];
                 if (!['delete', 'kick'].includes(setAction)) {
                     await sock.sendMessage(chatId, { 
-                        text: '*_Invalid action. Choose delete or kick._*' 
+                        text: '*_Ação inválida. Escolha delete ou kick._*' 
                     },{quoted :message});
                     return;
                 }
                 const setResult = await setAntitag(chatId, 'on', setAction);
                 await sock.sendMessage(chatId, { 
-                    text: setResult ? `*_Antitag action set to ${setAction}_*` : '*_Failed to set Antitag action_*' 
+                    text: setResult ? `*_Ação do Antitag definida para ${setAction}_*` : '*_Falha ao definir a ação do Antitag_*' 
                 },{quoted :message});
                 break;
 
@@ -60,16 +60,16 @@ async function handleAntitagCommand(sock, chatId, userMessage, senderId, isSende
                 const status = await getAntitag(chatId, 'on');
                 const actionConfig = await getAntitag(chatId, 'on');
                 await sock.sendMessage(chatId, { 
-                    text: `*_Antitag Configuration:_*\nStatus: ${status ? 'ON' : 'OFF'}\nAction: ${actionConfig ? actionConfig.action : 'Not set'}` 
+                    text: `*_Configuração do Antitag:_*\nStatus: ${status ? 'ATIVADO' : 'DESATIVADO'}\nAção: ${actionConfig ? actionConfig.action : 'Não definida'}` 
                 },{quoted :message});
                 break;
 
             default:
-                await sock.sendMessage(chatId, { text: `*_Use ${prefix}antitag for usage._*` },{quoted :message});
+                await sock.sendMessage(chatId, { text: `*_Use ${prefix}antitag para ver o uso._*` },{quoted :message});
         }
     } catch (error) {
-        console.error('Error in antitag command:', error);
-        await sock.sendMessage(chatId, { text: '*_Error processing antitag command_*' },{quoted :message});
+        console.error('Erro no comando antitag:', error);
+        await sock.sendMessage(chatId, { text: '*_Erro ao processar o comando antitag_*' },{quoted :message});
     }
 }
 
@@ -78,10 +78,10 @@ async function handleTagDetection(sock, chatId, message, senderId) {
         const antitagSetting = await getAntitag(chatId, 'on');
         if (!antitagSetting || !antitagSetting.enabled) return;
 
-        // Get mentioned JIDs from contextInfo (proper mentions)
+        // Obter JIDs mencionados do contextInfo (menções corretas)
         const mentionedJids = message.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
         
-        // Extract text from all possible message types
+        // Extrair texto de todos os tipos possíveis de mensagem
         const messageText = (
             message.message?.conversation ||
             message.message?.extendedTextMessage?.text ||
@@ -90,54 +90,54 @@ async function handleTagDetection(sock, chatId, message, senderId) {
             ''
         );
 
-        // Find all @mentions in text using improved regex
-        // Matches: @123456789, @⁨+91 70239 51514⁩, @~.., @217875470114951, etc.
+        // Encontrar todas as @menções no texto usando regex aprimorado
+        // Exemplos: @123456789, @⁨+91 70239 51514⁩, @~.., @217875470114951, etc.
         const textMentions = messageText.match(/@[\d+\s\-()~.]+/g) || [];
         
-        // Also match numeric-only mentions (like @217875470114951)
+        // Também capturar menções apenas numéricas (como @217875470114951)
         const numericMentions = messageText.match(/@\d{10,}/g) || [];
         
-        // Combine all mentions and remove duplicates
+        // Combinar todas as menções e remover duplicatas
         const allMentions = [...new Set([...mentionedJids, ...textMentions, ...numericMentions])];
         
-        // Count unique numeric mentions (bot tagall patterns)
+        // Contar menções numéricas únicas (padrões de tagall de bots)
         const uniqueNumericMentions = new Set();
         numericMentions.forEach(mention => {
             const numMatch = mention.match(/@(\d+)/);
             if (numMatch) uniqueNumericMentions.add(numMatch[1]);
         });
         
-        // Count mentions from mentionedJid array (proper WhatsApp mentions)
+        // Contar menções do array mentionedJid (menções corretas do WhatsApp)
         const mentionedJidCount = mentionedJids.length;
         
-        // Count unique numeric mentions found in text (bot tagall pattern)
+        // Contar menções numéricas únicas encontradas no texto (padrão tagall de bot)
         const numericMentionCount = uniqueNumericMentions.size;
         
-        // Use the higher count (either proper mentions or text-based mentions)
-        // This ensures we catch both standard mentions and bot tagall patterns
+        // Usar a contagem maior (menções corretas ou menções baseadas em texto)
+        // Isso garante capturar tanto menções padrão quanto padrões tagall de bots
         const totalMentions = Math.max(mentionedJidCount, numericMentionCount);
 
-        // Check if it's a group message and has multiple mentions
+        // Verificar se é mensagem de grupo e tem múltiplas menções
         if (totalMentions >= 3) {
-            // Get group participants to check if it's tagging most/all members
+            // Obter participantes do grupo para verificar se está marcando a maioria/todos
             const groupMetadata = await sock.groupMetadata(chatId);
             const participants = groupMetadata.participants || [];
             
-            // If mentions are more than 50% of group members, consider it as tagall
+            // Se menções forem mais que 50% dos membros do grupo, considerar como tagall
             const mentionThreshold = Math.ceil(participants.length * 0.5);
             
-            // Also check if there are many numeric mentions in the text (bot tagall pattern)
-            // This catches bots that use numeric IDs instead of proper mentions
+            // Também verificar se há muitas menções numéricas no texto (padrão tagall de bots)
+            // Isso captura bots que usam IDs numéricos em vez de menções corretas
             const hasManyNumericMentions = numericMentionCount >= 10 || 
                                           (numericMentionCount >= 5 && numericMentionCount >= mentionThreshold);
             
-            // Trigger if: standard mentions exceed threshold OR many numeric mentions detected
+            // Acionar se: menções padrão excederem o limite OU muitas menções numéricas detectadas
             if (totalMentions >= mentionThreshold || hasManyNumericMentions) {
                 
                 const action = antitagSetting.action || 'delete';
                 
                 if (action === 'delete') {
-                    // Delete the message
+                    // Apagar a mensagem
                     await sock.sendMessage(chatId, {
                         delete: {
                             remoteJid: chatId,
@@ -147,13 +147,13 @@ async function handleTagDetection(sock, chatId, message, senderId) {
                         }
                     });
                     
-                    // Send warning
+                    // Enviar aviso
                     await sock.sendMessage(chatId, {
-                        text: `⚠️ *Tagall Detected!*.`
+                        text: `⚠️ *Tagall Detectado!*.`
                     }, { quoted: message });
                     
                 } else if (action === 'kick') {
-                    // First delete the message
+                    // Primeiro apagar a mensagem
                     await sock.sendMessage(chatId, {
                         delete: {
                             remoteJid: chatId,
@@ -163,20 +163,20 @@ async function handleTagDetection(sock, chatId, message, senderId) {
                         }
                     });
 
-                    // Then kick the user
+                    // Depois expulsar o usuário
                     await sock.groupParticipantsUpdate(chatId, [senderId], "remove");
 
-                    // Send notification
+                    // Enviar notificação
                     const usernames = [`@${senderId.split('@')[0]}`];
                     await sock.sendMessage(chatId, {
-                        text: `🚫 *Antitag Detected!*\n\n${usernames.join(', ')} has been kicked for tagging all members.`,
+                        text: `🚫 *Antitag Detectado!*\n\n${usernames.join(', ')} foi expulso por marcar todos os membros.`,
                         mentions: [senderId]
                     }, { quoted: message });
                 }
             }
         }
     } catch (error) {
-        console.error('Error in tag detection:', error);
+        console.error('Erro na detecção de marcação:', error);
     }
 }
 
@@ -184,4 +184,3 @@ module.exports = {
     handleAntitagCommand,
     handleTagDetection
 };
-

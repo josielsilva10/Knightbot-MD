@@ -138,14 +138,14 @@ async function convertBufferToStickerWebp(inputBuffer, isAnimated, cropSquare) {
 }
 
 async function fetchBufferFromUrl(url) {
-    // Attempt 1: simple arraybuffer with generous limits
+    // Tentativa 1: arraybuffer simples com limites generosos
     try {
         const res = await axios.get(url, {
             responseType: 'arraybuffer',
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
                 'Accept': '*/*',
-                // Some CDNs misbehave with Referer/Origin; omit to reduce blocks
+                // Alguns CDNs se comportam mal com Referer/Origin; omitir para reduzir bloqueios
                 'Accept-Encoding': 'identity'
             },
             timeout: 30000,
@@ -156,7 +156,7 @@ async function fetchBufferFromUrl(url) {
         });
         return Buffer.from(res.data);
     } catch (e1) {
-        // Attempt 2: stream mode read fully
+        // Tentativa 2: modo stream, ler completamente
         try {
             const res = await axios.get(url, {
                 responseType: 'stream',
@@ -178,7 +178,7 @@ async function fetchBufferFromUrl(url) {
             });
             return Buffer.concat(chunks);
         } catch (e2) {
-            console.error('Both axios download attempts failed:', e1?.message || e1, e2?.message || e2);
+            console.error('Ambas as tentativas de download com axios falharam:', e1?.message || e1, e2?.message || e2);
             throw e2;
         }
     }
@@ -189,7 +189,7 @@ async function igsCommand(sock, chatId, message, crop = false) {
         const text = message.message?.conversation || message.message?.extendedTextMessage?.text || '';
         const urlMatch = text.match(/https?:\/\/\S+/);
         if (!urlMatch) {
-            await sock.sendMessage(chatId, { text: `Send an Instagram post/reel link.\nUsage:\n.igs <url>\n.igsc <url>` }, { quoted: message });
+            await sock.sendMessage(chatId, { text: `Envie um link de post/reel do Instagram.\nUso:\n.igs <url>\n.igsc <url>` }, { quoted: message });
             return;
         }
 
@@ -197,12 +197,12 @@ async function igsCommand(sock, chatId, message, crop = false) {
 
         const downloadData = await igdl(urlMatch[0]).catch(() => null);
         if (!downloadData || !downloadData.data) {
-            await sock.sendMessage(chatId, { text: '❌ Failed to fetch media from Instagram link.' }, { quoted: message });
+            await sock.sendMessage(chatId, { text: '❌ Falha ao obter mídia do link do Instagram.' }, { quoted: message });
             return;
         }
-        // Raw items
+        // Itens brutos
         const rawItems = (downloadData?.data || []).filter(m => m && m.url);
-        // Deduplicate by exact URL first
+        // Remover duplicatas por URL exata primeiro
         const seenUrls = new Set();
         const items = [];
         for (const m of rawItems) {
@@ -212,11 +212,11 @@ async function igsCommand(sock, chatId, message, crop = false) {
             }
         }
         if (items.length === 0) {
-            await sock.sendMessage(chatId, { text: '❌ No media found at the provided link.' }, { quoted: message });
+            await sock.sendMessage(chatId, { text: '❌ Nenhuma mídia encontrada no link fornecido.' }, { quoted: message });
             return;
         }
 
-        // Process up to 10 media items to avoid spam/timeouts
+        // Processar até 10 mídias para evitar spam/timeout
         const maxItems = Math.min(items.length, 10);
         const seenHashes = new Set();
         for (let i = 0; i < maxItems; i++) {
@@ -227,7 +227,7 @@ async function igsCommand(sock, chatId, message, crop = false) {
 
                 const buffer = await fetchBufferFromUrl(mediaUrl);
 
-                // Content-based dedupe: skip if identical media already processed
+                // Deduplicação baseada no conteúdo: pular se mídia idêntica já processada
                 const hash = require('crypto').createHash('sha1').update(buffer).digest('hex');
                 if (seenHashes.has(hash)) {
                     continue;
@@ -238,7 +238,7 @@ async function igsCommand(sock, chatId, message, crop = false) {
                     ? await stickercropFromBuffer(buffer, isVideo)
                     : await convertBufferToStickerWebp(buffer, isVideo, false);
 
-                // Ensure final size under ~900KB; otherwise try a harsher mini fallback
+                // Garantir tamanho final abaixo de ~900KB; caso contrário, tentar fallback mais agressivo
                 let finalSticker = stickerBuffer;
                 if (finalSticker.length > 900 * 1024) {
                     try {
@@ -247,29 +247,29 @@ async function igsCommand(sock, chatId, message, crop = false) {
                             finalSticker = fallback;
                         }
                     } catch (e) {
-                        console.error('forceMiniSticker error:', e);
+                        console.error('Erro em forceMiniSticker:', e);
                     }
                 }
 
                 await sock.sendMessage(chatId, { sticker: finalSticker }, { quoted: message });
 
-                // Small delay to avoid rate limiting
+                // Pequeno delay para evitar limitação de taxa
                 if (i < maxItems - 1) {
                     await new Promise(r => setTimeout(r, 800));
                 }
             } catch (perItemErr) {
-                console.error('IGS item error:', perItemErr);
-                // continue with next item
+                console.error('Erro no item IGS:', perItemErr);
+                // continuar com o próximo item
             }
         }
 
     } catch (err) {
-        console.error('Error in igs command:', err);
-        await sock.sendMessage(chatId, { text: 'Failed to create sticker from Instagram link.' }, { quoted: message });
+        console.error('Erro no comando igs:', err);
+        await sock.sendMessage(chatId, { text: 'Falha ao criar figurinha a partir do link do Instagram.' }, { quoted: message });
     }
 }
 
-// Extreme fallback to force very small stickers when needed
+// Fallback extremo para forçar figurinhas muito pequenas quando necessário
 async function forceMiniSticker(inputBuffer, isVideo, cropSquare) {
     const tmpDir = path.join(process.cwd(), 'tmp');
     if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
@@ -294,7 +294,7 @@ async function forceMiniSticker(inputBuffer, isVideo, cropSquare) {
     }
     const smallWebp = fs.readFileSync(tempOutput);
 
-    // Re-apply EXIF
+    // Reaplicar EXIF
     const img = new webp.Image();
     await img.load(smallWebp);
     const json = {
@@ -316,5 +316,3 @@ async function forceMiniSticker(inputBuffer, isVideo, cropSquare) {
 }
 
 module.exports = { igsCommand };
-
-

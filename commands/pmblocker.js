@@ -5,15 +5,15 @@ const PMBLOCKER_PATH = './data/pmblocker.json';
 
 function readState() {
     try {
-        if (!fs.existsSync(PMBLOCKER_PATH)) return { enabled: false, message: '⚠️ Direct messages are blocked!\nYou cannot DM this bot. Please contact the owner in group chats only.' };
+        if (!fs.existsSync(PMBLOCKER_PATH)) return { enabled: false, message: '⚠️ Mensagens diretas estão bloqueadas!\nVocê não pode enviar DM para este bot. Por favor, entre em contato com o dono apenas em grupos.' };
         const raw = fs.readFileSync(PMBLOCKER_PATH, 'utf8');
         const data = JSON.parse(raw || '{}');
         return {
             enabled: !!data.enabled,
-            message: typeof data.message === 'string' && data.message.trim() ? data.message : '⚠️ Direct messages are blocked!\nYou cannot DM this bot. Please contact the owner in group chats only.'
+            message: typeof data.message === 'string' && data.message.trim() ? data.message : '⚠️ Mensagens diretas estão bloqueadas!\nVocê não pode enviar DM para este bot. Por favor, entre em contato com o dono apenas em grupos.'
         };
     } catch {
-        return { enabled: false, message: '⚠️ Direct messages are blocked!\nYou cannot DM this bot. Please contact the owner in group chats only.' };
+        return { enabled: false, message: '⚠️ Mensagens diretas estão bloqueadas!\nVocê não pode enviar DM para este bot. Por favor, entre em contato com o dono apenas em grupos.' };
     }
 }
 
@@ -34,7 +34,7 @@ async function pmblockerCommand(sock, chatId, message, args) {
     const isOwner = await isOwnerOrSudo(senderId, sock, chatId);
     
     if (!message.key.fromMe && !isOwner) {
-        await sock.sendMessage(chatId, { text: 'Only bot owner can use this command!' }, { quoted: message });
+        await sock.sendMessage(chatId, { text: 'Apenas o dono do bot pode usar este comando!' }, { quoted: message });
         return;
     }
     
@@ -43,31 +43,29 @@ async function pmblockerCommand(sock, chatId, message, args) {
     const state = readState();
 
     if (!sub || !['on', 'off', 'status', 'setmsg'].includes(sub.toLowerCase())) {
-        await sock.sendMessage(chatId, { text: '*PMBLOCKER (Owner only)*\n\n.pmblocker on - Enable PM auto-block\n.pmblocker off - Disable PM blocker\n.pmblocker status - Show current status\n.pmblocker setmsg <text> - Set warning message' }, { quoted: message });
+        await sock.sendMessage(chatId, { text: '*PMBLOCKER (Apenas para o dono)*\n\n.pmblocker on - Ativar bloqueio automático de PM\n.pmblocker off - Desativar bloqueio de PM\n.pmblocker status - Mostrar status atual\n.pmblocker setmsg <texto> - Definir mensagem de aviso' }, { quoted: message });
         return;
     }
 
     if (sub.toLowerCase() === 'status') {
-        await sock.sendMessage(chatId, { text: `PM Blocker is currently *${state.enabled ? 'ON' : 'OFF'}*\nMessage: ${state.message}` }, { quoted: message });
+        await sock.sendMessage(chatId, { text: `Bloqueador de PM está atualmente *${state.enabled ? 'ATIVADO' : 'DESATIVADO'}*\nMensagem: ${state.message}` }, { quoted: message });
         return;
     }
 
     if (sub.toLowerCase() === 'setmsg') {
         const newMsg = rest.join(' ').trim();
         if (!newMsg) {
-            await sock.sendMessage(chatId, { text: 'Usage: .pmblocker setmsg <message>' }, { quoted: message });
+            await sock.sendMessage(chatId, { text: 'Uso: .pmblocker setmsg <mensagem>' }, { quoted: message });
             return;
         }
         writeState(state.enabled, newMsg);
-        await sock.sendMessage(chatId, { text: 'PM Blocker message updated.' }, { quoted: message });
+        await sock.sendMessage(chatId, { text: 'Mensagem do Bloqueador de PM atualizada.' }, { quoted: message });
         return;
     }
 
     const enable = sub.toLowerCase() === 'on';
     writeState(enable);
-    await sock.sendMessage(chatId, { text: `PM Blocker is now *${enable ? 'ENABLED' : 'DISABLED'}*.` }, { quoted: message });
+    await sock.sendMessage(chatId, { text: `Bloqueador de PM está agora *${enable ? 'ATIVADO' : 'DESATIVADO'}*.` }, { quoted: message });
 }
 
 module.exports = { pmblockerCommand, readState };
-
-

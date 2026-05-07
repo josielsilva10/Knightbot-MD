@@ -17,7 +17,7 @@ async function settingsCommand(sock, chatId, message) {
         const isOwner = await isOwnerOrSudo(senderId, sock, chatId);
         
         if (!message.key.fromMe && !isOwner) {
-            await sock.sendMessage(chatId, { text: 'Only bot owner can use this command!' }, { quoted: message });
+            await sock.sendMessage(chatId, { text: 'Apenas o dono do bot pode usar este comando!' }, { quoted: message });
             return;
         }
 
@@ -45,50 +45,48 @@ async function settingsCommand(sock, chatId, message) {
         const antitagCfg = groupId ? (userGroupData.antitag && userGroupData.antitag[groupId]) : null;
 
         const lines = [];
-        lines.push('*BOT SETTINGS*');
+        lines.push('*CONFIGURAÇÕES DO BOT*');
         lines.push('');
-        lines.push(`• Mode: ${mode.isPublic ? 'Public' : 'Private'}`);
-        lines.push(`• Auto Status: ${autoStatus.enabled ? 'ON' : 'OFF'}`);
-        lines.push(`• Autoread: ${autoread.enabled ? 'ON' : 'OFF'}`);
-        lines.push(`• Autotyping: ${autotyping.enabled ? 'ON' : 'OFF'}`);
-        lines.push(`• PM Blocker: ${pmblocker.enabled ? 'ON' : 'OFF'}`);
-        lines.push(`• Anticall: ${anticall.enabled ? 'ON' : 'OFF'}`);
-        lines.push(`• Auto Reaction: ${autoReaction ? 'ON' : 'OFF'}`);
+        lines.push(`• Modo: ${mode.isPublic ? 'Público' : 'Privado'}`);
+        lines.push(`• Status Automático: ${autoStatus.enabled ? 'LIGADO' : 'DESLIGADO'}`);
+        lines.push(`• Leitura Automática: ${autoread.enabled ? 'LIGADO' : 'DESLIGADO'}`);
+        lines.push(`• Digitação Automática: ${autotyping.enabled ? 'LIGADO' : 'DESLIGADO'}`);
+        lines.push(`• Bloqueio de PM: ${pmblocker.enabled ? 'LIGADO' : 'DESLIGADO'}`);
+        lines.push(`• Antichamada: ${anticall.enabled ? 'LIGADO' : 'DESLIGADO'}`);
+        lines.push(`• Reação Automática: ${autoReaction ? 'LIGADO' : 'DESLIGADO'}`);
         if (groupId) {
             lines.push('');
-            lines.push(`Group: ${groupId}`);
+            lines.push(`Grupo: ${groupId}`);
             if (antilinkOn) {
                 const al = userGroupData.antilink[groupId];
-                lines.push(`• Antilink: ON (action: ${al.action || 'delete'})`);
+                lines.push(`• Antilink: LIGADO (ação: ${al.action || 'deletar'})`);
             } else {
-                lines.push('• Antilink: OFF');
+                lines.push('• Antilink: DESLIGADO');
             }
             if (antibadwordOn) {
                 const ab = userGroupData.antibadword[groupId];
-                lines.push(`• Antibadword: ON (action: ${ab.action || 'delete'})`);
+                lines.push(`• Antipalavrões: LIGADO (ação: ${ab.action || 'deletar'})`);
             } else {
-                lines.push('• Antibadword: OFF');
+                lines.push('• Antipalavrões: DESLIGADO');
             }
-            lines.push(`• Welcome: ${welcomeOn ? 'ON' : 'OFF'}`);
-            lines.push(`• Goodbye: ${goodbyeOn ? 'ON' : 'OFF'}`);
-            lines.push(`• Chatbot: ${chatbotOn ? 'ON' : 'OFF'}`);
+            lines.push(`• Boas-vindas: ${welcomeOn ? 'LIGADO' : 'DESLIGADO'}`);
+            lines.push(`• Despedida: ${goodbyeOn ? 'LIGADO' : 'DESLIGADO'}`);
+            lines.push(`• Chatbot: ${chatbotOn ? 'LIGADO' : 'DESLIGADO'}`);
             if (antitagCfg && antitagCfg.enabled) {
-                lines.push(`• Antitag: ON (action: ${antitagCfg.action || 'delete'})`);
+                lines.push(`• Antitag: LIGADO (ação: ${antitagCfg.action || 'deletar'})`);
             } else {
-                lines.push('• Antitag: OFF');
+                lines.push('• Antitag: DESLIGADO');
             }
         } else {
             lines.push('');
-            lines.push('Note: Per-group settings will be shown when used inside a group.');
+            lines.push('Nota: As configurações por grupo serão exibidas quando usadas dentro de um grupo.');
         }
 
         await sock.sendMessage(chatId, { text: lines.join('\n') }, { quoted: message });
     } catch (error) {
-        console.error('Error in settings command:', error);
-        await sock.sendMessage(chatId, { text: 'Failed to read settings.' }, { quoted: message });
+        console.error('Erro no comando de configurações:', error);
+        await sock.sendMessage(chatId, { text: 'Falha ao ler as configurações.' }, { quoted: message });
     }
 }
 
 module.exports = settingsCommand;
-
-

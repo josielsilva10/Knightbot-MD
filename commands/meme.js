@@ -10,13 +10,13 @@ async function memeCommand(sock, chatId, message) {
             const imageBuffer = await response.buffer();
             
             const buttons = [
-                { buttonId: '.meme', buttonText: { displayText: '🎭 Another Meme' }, type: 1 },
-                { buttonId: '.joke', buttonText: { displayText: '😄 Joke' }, type: 1 }
+                { buttonId: '.meme', buttonText: { displayText: '🎭 Outro Meme' }, type: 1 },
+                { buttonId: '.joke', buttonText: { displayText: '😄 Piada' }, type: 1 }
             ];
 
             await sock.sendMessage(chatId, { 
                 image: imageBuffer,
-                caption: "> Here's your cheems meme! 🐕",
+                caption: "> Aqui está seu meme do cheems! 🐕",
                 buttons: buttons,
                 headerType: 1
             },{ quoted: message});
@@ -24,9 +24,9 @@ async function memeCommand(sock, chatId, message) {
             throw new Error('Invalid response type from API');
         }
     } catch (error) {
-        console.error('Error in meme command:', error);
+        console.error('Erro no comando meme:', error);
         await sock.sendMessage(chatId, { 
-            text: '❌ Failed to fetch meme. Please try again later.'
+            text: '❌ Falha ao buscar meme. Por favor, tente novamente mais tarde.'
         },{ quoted: message });
     }
 }

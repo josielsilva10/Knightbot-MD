@@ -31,7 +31,7 @@ async function stickercropCommand(sock, chatId, message) {
 
     if (!mediaMessage) {
         await sock.sendMessage(chatId, { 
-            text: 'Please reply to an image/video/sticker with .crop, or send an image/video/sticker with .crop as the caption.',
+            text: 'Por favor, responda a uma imagem/vídeo/figurinha com .crop, ou envie uma imagem/vídeo/figurinha com .crop como legenda.',
             contextInfo: {
                 forwardingScore: 999,
                 isForwarded: true,
@@ -53,7 +53,7 @@ async function stickercropCommand(sock, chatId, message) {
 
         if (!mediaBuffer) {
             await sock.sendMessage(chatId, { 
-                text: 'Failed to download media. Please try again.',
+                text: 'Falha ao baixar a mídia. Por favor, tente novamente.',
                 contextInfo: {
                     forwardingScore: 999,
                     isForwarded: true,
@@ -110,7 +110,7 @@ async function stickercropCommand(sock, chatId, message) {
         await new Promise((resolve, reject) => {
             exec(ffmpegCommand, (error, stdout, stderr) => {
                 if (error) {
-                    console.error('FFmpeg error:', error);
+                    console.error('Erro no FFmpeg:', error);
                     console.error('FFmpeg stderr:', stderr);
                     reject(error);
                 } else {
@@ -122,12 +122,12 @@ async function stickercropCommand(sock, chatId, message) {
 
         // Check if output file exists and has content
         if (!fs.existsSync(tempOutput)) {
-            throw new Error('FFmpeg failed to create output file');
+            throw new Error('FFmpeg falhou ao criar o arquivo de saída');
         }
 
         const outputStats = fs.statSync(tempOutput);
         if (outputStats.size === 0) {
-            throw new Error('FFmpeg created empty output file');
+            throw new Error('FFmpeg criou um arquivo de saída vazio');
         }
 
         // Read the WebP file
@@ -135,11 +135,11 @@ async function stickercropCommand(sock, chatId, message) {
         
         // Check final file size
         const finalSizeKB = webpBuffer.length / 1024;
-        console.log(`Final sticker size: ${Math.round(finalSizeKB)} KB`);
+        console.log(`Tamanho final da figurinha: ${Math.round(finalSizeKB)} KB`);
         
         // If still too large, we'll send it anyway but log a warning
         if (finalSizeKB > 1000) { // 1MB limit for WhatsApp stickers
-            console.log(`⚠️ Warning: Sticker size (${Math.round(finalSizeKB)} KB) exceeds recommended limit but will be sent anyway`);
+            console.log(`⚠️ Aviso: O tamanho da figurinha (${Math.round(finalSizeKB)} KB) excede o limite recomendado, mas será enviada mesmo assim`);
         }
 
         // Add metadata using webpmux
@@ -175,13 +175,13 @@ async function stickercropCommand(sock, chatId, message) {
             fs.unlinkSync(tempInput);
             fs.unlinkSync(tempOutput);
         } catch (err) {
-            console.error('Error cleaning up temp files:', err);
+            console.error('Erro ao limpar arquivos temporários:', err);
         }
 
     } catch (error) {
-        console.error('Error in stickercrop command:', error);
+        console.error('Erro no comando stickercrop:', error);
         await sock.sendMessage(chatId, { 
-            text: 'Failed to crop sticker! Try with an image.',
+            text: 'Falha ao cortar a figurinha! Tente com uma imagem.',
             contextInfo: {
                 forwardingScore: 999,
                 isForwarded: true,

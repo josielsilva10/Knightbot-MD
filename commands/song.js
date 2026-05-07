@@ -71,7 +71,7 @@ async function songCommand(sock, chatId, message) {
     try {
         const text = message.message?.conversation || message.message?.extendedTextMessage?.text || '';
         if (!text) {
-            await sock.sendMessage(chatId, { text: 'Usage: .song <song name or YouTube link>' }, { quoted: message });
+            await sock.sendMessage(chatId, { text: 'Uso: .song <nome da música ou link do YouTube>' }, { quoted: message });
             return;
         }
 
@@ -81,42 +81,42 @@ async function songCommand(sock, chatId, message) {
         } else {
 			const search = await yts(text);
 			if (!search || !search.videos.length) {
-                await sock.sendMessage(chatId, { text: 'No results found.' }, { quoted: message });
+                await sock.sendMessage(chatId, { text: 'Nenhum resultado encontrado.' }, { quoted: message });
                 return;
             }
 			video = search.videos[0];
         }
 
-        // Inform user
+        // Informar usuário
         await sock.sendMessage(chatId, {
             image: { url: video.thumbnail },
-            caption: `🎵 Downloading: *${video.title}*\n⏱ Duration: ${video.timestamp}`
+            caption: `🎵 Baixando: *${video.title}*\n⏱ Duração: ${video.timestamp}`
         }, { quoted: message });
 
-		// Try multiple APIs with fallback chain: EliteProTech -> Yupra -> Okatsu
+		// Tentar múltiplas APIs com fallback: EliteProTech -> Yupra -> Okatsu
 		let audioData;
 		let audioBuffer;
 		let downloadSuccess = false;
 		
-		// List of API methods to try
+		// Lista de métodos de API para tentar
 		const apiMethods = [
 			{ name: 'EliteProTech', method: () => getEliteProTechDownloadByUrl(video.url) },
 			{ name: 'Yupra', method: () => getYupraDownloadByUrl(video.url) },
 			{ name: 'Okatsu', method: () => getOkatsuDownloadByUrl(video.url) }
 		];
 		
-		// Try each API until we successfully download audio
+		// Tentar cada API até conseguir baixar o áudio
 		for (const apiMethod of apiMethods) {
 			try {
 				audioData = await apiMethod.method();
 				const audioUrl = audioData.download || audioData.dl || audioData.url;
 				
 				if (!audioUrl) {
-					console.log(`${apiMethod.name} returned no download URL, trying next API...`);
-					continue; // Try next API
+					console.log(`${apiMethod.name} não retornou URL de download, tentando próxima API...`);
+					continue; // Tentar próxima API
 				}
 				
-				// Try to download the audio file - arraybuffer first
+				// Tentar baixar o arquivo de áudio - arraybuffer primeiro
 				try {
 					const audioResponse = await axios.get(audioUrl, {
 						responseType: 'arraybuffer',
@@ -133,20 +133,20 @@ async function songCommand(sock, chatId, message) {
 					});
 					audioBuffer = Buffer.from(audioResponse.data);
 					
-					// Validate buffer
+					// Validar buffer
 					if (audioBuffer && audioBuffer.length > 0) {
 						downloadSuccess = true;
-						break; // Success! Exit the loop
+						break; // Sucesso! Sair do loop
 					}
 				} catch (downloadErr) {
-					// Check if it's a 451 error or other client/server error
+					// Verificar se é erro 451 ou outro erro cliente/servidor
 					const statusCode = downloadErr.response?.status || downloadErr.status;
 					if (statusCode === 451) {
-						console.log(`Download blocked (451) from ${apiMethod.name}, trying next API...`);
-						continue; // Try next API
+						console.log(`Download bloqueado (451) pelo ${apiMethod.name}, tentando próxima API...`);
+						continue; // Tentar próxima API
 					}
 					
-					// Try stream mode as fallback for this URL
+					// Tentar modo stream como fallback para essa URL
 					try {
 						const audioResponse = await axios.get(audioUrl, {
 							responseType: 'stream',
@@ -170,48 +170,48 @@ async function songCommand(sock, chatId, message) {
 						
 						if (audioBuffer && audioBuffer.length > 0) {
 							downloadSuccess = true;
-							break; // Success! Exit the loop
+							break; // Sucesso! Sair do loop
 						}
 					} catch (streamErr) {
-						// Stream mode also failed, try next API
+						// Modo stream também falhou, tentar próxima API
 						const streamStatusCode = streamErr.response?.status || streamErr.status;
 						if (streamStatusCode === 451) {
-							console.log(`Stream download blocked (451) from ${apiMethod.name}, trying next API...`);
+							console.log(`Download por stream bloqueado (451) pelo ${apiMethod.name}, tentando próxima API...`);
 						} else {
-							console.log(`Stream download failed from ${apiMethod.name}:`, streamErr.message);
+							console.log(`Falha no download por stream do ${apiMethod.name}:`, streamErr.message);
 						}
-						continue; // Try next API
+						continue; // Tentar próxima API
 					}
 				}
 			} catch (apiErr) {
-				// API call failed, try next API
-				console.log(`${apiMethod.name} API failed:`, apiErr.message);
+				// Chamada da API falhou, tentar próxima API
+				console.log(`API ${apiMethod.name} falhou:`, apiErr.message);
 				continue;
 			}
 		}
 		
-		// If all APIs failed, throw error
+		// Se todas as APIs falharam, lançar erro
 		if (!downloadSuccess || !audioBuffer) {
-			throw new Error('All download sources failed. The content may be unavailable or blocked in your region.');
+			throw new Error('Todas as fontes de download falharam. O conteúdo pode estar indisponível ou bloqueado em sua região.');
 		}
 
-		// Validate buffer
+		// Validar buffer
 		if (!audioBuffer || audioBuffer.length === 0) {
-			throw new Error('Downloaded audio buffer is empty');
+			throw new Error('O buffer de áudio baixado está vazio');
 		}
 
-		// Detect actual file format from signature
+		// Detectar formato real do arquivo pela assinatura
 		const firstBytes = audioBuffer.slice(0, 12);
 		const hexSignature = firstBytes.toString('hex');
 		const asciiSignature = firstBytes.toString('ascii', 4, 8);
 
 		let actualMimetype = 'audio/mpeg';
 		let fileExtension = 'mp3';
-		let detectedFormat = 'unknown';
+		let detectedFormat = 'desconhecido';
 
-		// Check for MP4/M4A (ftyp box)
+		// Verificar MP4/M4A (caixa ftyp)
 		if (asciiSignature === 'ftyp' || hexSignature.startsWith('000000')) {
-			// Check if it's M4A (audio/mp4)
+			// Verificar se é M4A (audio/mp4)
 			const ftypBox = audioBuffer.slice(4, 8).toString('ascii');
 			if (ftypBox === 'ftyp') {
 				detectedFormat = 'M4A/MP4';
@@ -219,33 +219,33 @@ async function songCommand(sock, chatId, message) {
 				fileExtension = 'm4a';
 			}
 		}
-		// Check for MP3 (ID3 tag or MPEG frame sync)
+		// Verificar MP3 (tag ID3 ou sincronização de quadro MPEG)
 		else if (audioBuffer.toString('ascii', 0, 3) === 'ID3' || 
 		         (audioBuffer[0] === 0xFF && (audioBuffer[1] & 0xE0) === 0xE0)) {
 			detectedFormat = 'MP3';
 			actualMimetype = 'audio/mpeg';
 			fileExtension = 'mp3';
 		}
-		// Check for OGG/Opus
+		// Verificar OGG/Opus
 		else if (audioBuffer.toString('ascii', 0, 4) === 'OggS') {
 			detectedFormat = 'OGG/Opus';
 			actualMimetype = 'audio/ogg; codecs=opus';
 			fileExtension = 'ogg';
 		}
-		// Check for WAV
+		// Verificar WAV
 		else if (audioBuffer.toString('ascii', 0, 4) === 'RIFF') {
 			detectedFormat = 'WAV';
 			actualMimetype = 'audio/wav';
 			fileExtension = 'wav';
 		}
 		else {
-			// Default to M4A since that's what the signature often suggests
+			// Padrão para M4A, pois a assinatura geralmente sugere isso
 			actualMimetype = 'audio/mp4';
 			fileExtension = 'm4a';
-			detectedFormat = 'Unknown (defaulting to M4A)';
+			detectedFormat = 'Desconhecido (padronizando para M4A)';
 		}
 
-		// Convert to MP3 if not already MP3
+		// Converter para MP3 se não for MP3
 		let finalBuffer = audioBuffer;
 		let finalMimetype = 'audio/mpeg';
 		let finalExtension = 'mp3';
@@ -254,16 +254,16 @@ async function songCommand(sock, chatId, message) {
 			try {
 				finalBuffer = await toAudio(audioBuffer, fileExtension);
 				if (!finalBuffer || finalBuffer.length === 0) {
-					throw new Error('Conversion returned empty buffer');
+					throw new Error('Conversão retornou buffer vazio');
 				}
 				finalMimetype = 'audio/mpeg';
 				finalExtension = 'mp3';
 			} catch (convErr) {
-				throw new Error(`Failed to convert ${detectedFormat} to MP3: ${convErr.message}`);
+				throw new Error(`Falha ao converter ${detectedFormat} para MP3: ${convErr.message}`);
 			}
 		}
 
-		// Send buffer as MP3
+		// Enviar buffer como MP3
 		await sock.sendMessage(chatId, {
 			audio: finalBuffer,
 			mimetype: finalMimetype,
@@ -271,7 +271,7 @@ async function songCommand(sock, chatId, message) {
 			ptt: false
 		}, { quoted: message });
 
-		// Cleanup: Delete temp files created during conversion
+		// Limpeza: deletar arquivos temporários criados durante a conversão
 		try {
 			const tempDir = path.join(__dirname, '../temp');
 			if (fs.existsSync(tempDir)) {
@@ -281,33 +281,33 @@ async function songCommand(sock, chatId, message) {
 					const filePath = path.join(tempDir, file);
 					try {
 						const stats = fs.statSync(filePath);
-						// Delete temp files older than 10 seconds (conversion temp files)
+						// Deletar arquivos temporários com mais de 10 segundos (arquivos temporários de conversão)
 						if (now - stats.mtimeMs > 10000) {
-							// Check if it's a temp audio file (mp3, m4a, or numeric timestamp files from converter)
+							// Verificar se é arquivo temporário de áudio (mp3, m4a, ou arquivos com timestamp numérico do conversor)
 							if (file.endsWith('.mp3') || file.endsWith('.m4a') || /^\d+\.(mp3|m4a)$/.test(file)) {
 								fs.unlinkSync(filePath);
 							}
 						}
 					} catch (e) {
-						// Ignore individual file errors
+						// Ignorar erros individuais de arquivo
 					}
 				});
 			}
 		} catch (cleanupErr) {
-			// Ignore cleanup errors
+			// Ignorar erros na limpeza
 		}
 
     } catch (err) {
-        console.error('Song command error:', err);
+        console.error('Erro no comando song:', err);
         
-        // Provide more specific error messages
-        let errorMessage = '❌ Failed to download song.';
+        // Fornecer mensagens de erro mais específicas
+        let errorMessage = '❌ Falha ao baixar a música.';
         if (err.message && err.message.includes('blocked')) {
-            errorMessage = '❌ Download blocked. The content may be unavailable in your region or due to legal restrictions.';
+            errorMessage = '❌ Download bloqueado. O conteúdo pode estar indisponível em sua região ou devido a restrições legais.';
         } else if (err.response?.status === 451 || err.status === 451) {
-            errorMessage = '❌ Content unavailable (451). This may be due to legal restrictions or regional blocking.';
+            errorMessage = '❌ Conteúdo indisponível (451). Isso pode ser devido a restrições legais ou bloqueio regional.';
         } else if (err.message && err.message.includes('All download sources failed')) {
-            errorMessage = '❌ All download sources failed. The content may be unavailable or blocked.';
+            errorMessage = '❌ Todas as fontes de download falharam. O conteúdo pode estar indisponível ou bloqueado.';
         }
         
         await sock.sendMessage(chatId, { 

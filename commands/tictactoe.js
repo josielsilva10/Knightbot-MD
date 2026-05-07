@@ -11,7 +11,7 @@ async function tictactoeCommand(sock, chatId, senderId, text) {
             [room.game.playerX, room.game.playerO].includes(senderId)
         )) {
             await sock.sendMessage(chatId, { 
-                text: '❌ You are still in a game. Type *surrender* to quit.' 
+                text: '❌ Você ainda está em uma partida. Digite *surrender* para desistir.' 
             });
             return;
         }
@@ -43,19 +43,19 @@ async function tictactoeCommand(sock, chatId, senderId, text) {
             }[v]));
 
             const str = `
-🎮 *TicTacToe Game Started!*
+🎮 *Jogo da Velha Iniciado!*
 
-Waiting for @${room.game.currentTurn.split('@')[0]} to play...
+Esperando @${room.game.currentTurn.split('@')[0]} jogar...
 
 ${arr.slice(0, 3).join('')}
 ${arr.slice(3, 6).join('')}
 ${arr.slice(6).join('')}
 
-▢ *Room ID:* ${room.id}
-▢ *Rules:*
-• Make 3 rows of symbols vertically, horizontally or diagonally to win
-• Type a number (1-9) to place your symbol
-• Type *surrender* to give up
+▢ *ID da Sala:* ${room.id}
+▢ *Regras:*
+• Faça 3 linhas de símbolos na vertical, horizontal ou diagonal para vencer
+• Digite um número (1-9) para colocar seu símbolo
+• Digite *surrender* para desistir
 `;
 
             // Send message only once to the group
@@ -77,16 +77,16 @@ ${arr.slice(6).join('')}
             if (text) room.name = text;
 
             await sock.sendMessage(chatId, { 
-                text: `⏳ *Waiting for opponent*\nType *.ttt ${text || ''}* to join!`
+                text: `⏳ *Aguardando oponente*\nDigite *.ttt ${text || ''}* para entrar!`
             });
 
             games[room.id] = room;
         }
 
     } catch (error) {
-        console.error('Error in tictactoe command:', error);
+        console.error('Erro no comando tictactoe:', error);
         await sock.sendMessage(chatId, { 
-            text: '❌ Error starting game. Please try again.' 
+            text: '❌ Erro ao iniciar o jogo. Por favor, tente novamente.' 
         });
     }
 }
@@ -109,7 +109,7 @@ async function handleTicTacToeMove(sock, chatId, senderId, text) {
         // Allow surrender at any time, not just during player's turn
         if (senderId !== room.game.currentTurn && !isSurrender) {
             await sock.sendMessage(chatId, { 
-                text: '❌ Not your turn!' 
+                text: '❌ Não é sua vez!' 
             });
             return;
         }
@@ -121,7 +121,7 @@ async function handleTicTacToeMove(sock, chatId, senderId, text) {
 
         if (!ok) {
             await sock.sendMessage(chatId, { 
-                text: '❌ Invalid move! That position is already taken.' 
+                text: '❌ Jogada inválida! Essa posição já está ocupada.' 
             });
             return;
         }
@@ -149,7 +149,7 @@ async function handleTicTacToeMove(sock, chatId, senderId, text) {
             
             // Send a surrender message
             await sock.sendMessage(chatId, { 
-                text: `🏳️ @${senderId.split('@')[0]} has surrendered! @${winner.split('@')[0]} wins the game!`,
+                text: `🏳️ @${senderId.split('@')[0]} desistiu! @${winner.split('@')[0]} venceu a partida!`,
                 mentions: [senderId, winner]
             });
             
@@ -160,15 +160,15 @@ async function handleTicTacToeMove(sock, chatId, senderId, text) {
 
         let gameStatus;
         if (winner) {
-            gameStatus = `🎉 @${winner.split('@')[0]} wins the game!`;
+            gameStatus = `🎉 @${winner.split('@')[0]} venceu a partida!`;
         } else if (isTie) {
-            gameStatus = `🤝 Game ended in a draw!`;
+            gameStatus = `🤝 A partida terminou empatada!`;
         } else {
-            gameStatus = `🎲 Turn: @${room.game.currentTurn.split('@')[0]} (${senderId === room.game.playerX ? '❎' : '⭕'})`;
+            gameStatus = `🎲 Vez de: @${room.game.currentTurn.split('@')[0]} (${senderId === room.game.playerX ? '❎' : '⭕'})`;
         }
 
         const str = `
-🎮 *TicTacToe Game*
+🎮 *Jogo da Velha*
 
 ${gameStatus}
 
@@ -176,10 +176,10 @@ ${arr.slice(0, 3).join('')}
 ${arr.slice(3, 6).join('')}
 ${arr.slice(6).join('')}
 
-▢ Player ❎: @${room.game.playerX.split('@')[0]}
-▢ Player ⭕: @${room.game.playerO.split('@')[0]}
+▢ Jogador ❎: @${room.game.playerX.split('@')[0]}
+▢ Jogador ⭕: @${room.game.playerO.split('@')[0]}
 
-${!winner && !isTie ? '• Type a number (1-9) to make your move\n• Type *surrender* to give up' : ''}
+${!winner && !isTie ? '• Digite um número (1-9) para fazer sua jogada\n• Digite *surrender* para desistir' : ''}
 `;
 
         const mentions = [
@@ -205,7 +205,7 @@ ${!winner && !isTie ? '• Type a number (1-9) to make your move\n• Type *surr
         }
 
     } catch (error) {
-        console.error('Error in tictactoe move:', error);
+        console.error('Erro na jogada do tictactoe:', error);
     }
 }
 

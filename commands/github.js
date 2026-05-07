@@ -7,17 +7,17 @@ const path = require('path');
 async function githubCommand(sock, chatId, message) {
   try {
     const res = await fetch('https://api.github.com/repos/mruniquehacker/Knightbot-md');
-    if (!res.ok) throw new Error('Error fetching repository data');
+    if (!res.ok) throw new Error('Erro ao buscar dados do repositório');
     const json = await res.json();
 
     let txt = `*乂  Knight Bot MD  乂*\n\n`;
-    txt += `✩  *Name* : ${json.name}\n`;
-    txt += `✩  *Watchers* : ${json.watchers_count}\n`;
-    txt += `✩  *Size* : ${(json.size / 1024).toFixed(2)} MB\n`;
-    txt += `✩  *Last Updated* : ${moment(json.updated_at).format('DD/MM/YY - HH:mm:ss')}\n`;
+    txt += `✩  *Nome* : ${json.name}\n`;
+    txt += `✩  *Observadores* : ${json.watchers_count}\n`;
+    txt += `✩  *Tamanho* : ${(json.size / 1024).toFixed(2)} MB\n`;
+    txt += `✩  *Última Atualização* : ${moment(json.updated_at).format('DD/MM/YY - HH:mm:ss')}\n`;
     txt += `✩  *URL* : ${json.html_url}\n`;
     txt += `✩  *Forks* : ${json.forks_count}\n`;
-    txt += `✩  *Stars* : ${json.stargazers_count}\n\n`;
+    txt += `✩  *Estrelas* : ${json.stargazers_count}\n\n`;
     txt += `💥 *KnightBot MD*`;
 
     // Use the local asset image
@@ -26,7 +26,7 @@ async function githubCommand(sock, chatId, message) {
 
     await sock.sendMessage(chatId, { image: imgBuffer, caption: txt }, { quoted: message });
   } catch (error) {
-    await sock.sendMessage(chatId, { text: '❌ Error fetching repository information.' }, { quoted: message });
+    await sock.sendMessage(chatId, { text: '❌ Erro ao buscar informações do repositório.' }, { quoted: message });
   }
 }
 

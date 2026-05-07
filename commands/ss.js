@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 async function handleSsCommand(sock, chatId, message, match) {
     if (!match) {
         await sock.sendMessage(chatId, {
-            text: `*SCREENSHOT TOOL*\n\n*.ss <url>*\n*.ssweb <url>*\n*.screenshot <url>*\n\nTake a screenshot of any website\n\nExample:\n.ss https://google.com\n.ssweb https://google.com\n.screenshot https://google.com`,
+            text: `*FERRAMENTA DE CAPTURA DE TELA*\n\n*.ss <url>*\n*.ssweb <url>*\n*.screenshot <url>*\n\nTire uma captura de tela de qualquer site\n\nExemplo:\n.ss https://google.com\n.ssweb https://google.com\n.screenshot https://google.com`,
             quoted: message
         });
         return;
@@ -20,7 +20,7 @@ async function handleSsCommand(sock, chatId, message, match) {
         // Validate URL
         if (!url.startsWith('http://') && !url.startsWith('https://')) {
             return sock.sendMessage(chatId, {
-                text: '❌ Please provide a valid URL starting with http:// or https://',
+                text: '❌ Por favor, forneça uma URL válida começando com http:// ou https://',
                 quoted: message
             });
         }
@@ -30,7 +30,7 @@ async function handleSsCommand(sock, chatId, message, match) {
         const response = await fetch(apiUrl, { headers: { 'accept': '*/*' } });
         
         if (!response.ok) {
-            throw new Error(`API responded with status: ${response.status}`);
+            throw new Error(`API respondeu com status: ${response.status}`);
         }
 
         // Get the image buffer
@@ -44,9 +44,9 @@ async function handleSsCommand(sock, chatId, message, match) {
         });
 
     } catch (error) {
-        console.error('❌ Error in ss command:', error);
+        console.error('❌ Erro no comando ss:', error);
         await sock.sendMessage(chatId, {
-            text: '❌ Failed to take screenshot. Please try again in a few minutes.\n\nPossible reasons:\n• Invalid URL\n• Website is blocking screenshots\n• Website is down\n• API service is temporarily unavailable',
+            text: '❌ Falha ao tirar a captura de tela. Por favor, tente novamente em alguns minutos.\n\nPossíveis motivos:\n• URL inválida\n• O site está bloqueando capturas de tela\n• O site está fora do ar\n• O serviço da API está temporariamente indisponível',
             quoted: message
         });
     }

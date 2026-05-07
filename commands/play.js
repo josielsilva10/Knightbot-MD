@@ -8,7 +8,7 @@ async function playCommand(sock, chatId, message) {
         
         if (!searchQuery) {
             return await sock.sendMessage(chatId, { 
-                text: "What song do you want to download?"
+                text: "Qual música você quer baixar?"
             });
         }
 
@@ -16,13 +16,13 @@ async function playCommand(sock, chatId, message) {
         const { videos } = await yts(searchQuery);
         if (!videos || videos.length === 0) {
             return await sock.sendMessage(chatId, { 
-                text: "No songs found!"
+                text: "Nenhuma música encontrada!"
             });
         }
 
         // Send loading message
         await sock.sendMessage(chatId, {
-            text: "_Please wait your download is in progress_"
+            text: "_Por favor, aguarde, seu download está em andamento_"
         });
 
         // Get the first video result
@@ -35,7 +35,7 @@ async function playCommand(sock, chatId, message) {
 
         if (!data || !data.status || !data.result || !data.result.downloadUrl) {
             return await sock.sendMessage(chatId, { 
-                text: "Failed to fetch audio from the API. Please try again later."
+                text: "Falha ao obter o áudio da API. Por favor, tente novamente mais tarde."
             });
         }
 
@@ -50,9 +50,9 @@ async function playCommand(sock, chatId, message) {
         }, { quoted: message });
 
     } catch (error) {
-        console.error('Error in song2 command:', error);
+        console.error('Erro no comando song2:', error);
         await sock.sendMessage(chatId, { 
-            text: "Download failed. Please try again later."
+            text: "Falha no download. Por favor, tente novamente mais tarde."
         });
     }
 }

@@ -3,13 +3,13 @@ const { isGoodByeOn, getGoodbye } = require('../lib/index');
 const fetch = require('node-fetch');
 
 async function goodbyeCommand(sock, chatId, message, match) {
-    // Check if it's a group
+    // Verifica se é um grupo
     if (!chatId.endsWith('@g.us')) {
-        await sock.sendMessage(chatId, { text: 'This command can only be used in groups.' });
+        await sock.sendMessage(chatId, { text: 'Este comando só pode ser usado em grupos.' });
         return;
     }
 
-    // Extract match from message
+    // Extrai o texto do comando
     const text = message.message?.conversation || 
                 message.message?.extendedTextMessage?.text || '';
     const matchText = text.split(' ').slice(1).join(' ');
@@ -18,32 +18,32 @@ async function goodbyeCommand(sock, chatId, message, match) {
 }
 
 async function handleLeaveEvent(sock, id, participants) {
-    // Check if goodbye is enabled for this group
+    // Verifica se a despedida está ativada para este grupo
     const isGoodbyeEnabled = await isGoodByeOn(id);
     if (!isGoodbyeEnabled) return;
 
-    // Get custom goodbye message
+    // Obtém a mensagem de despedida personalizada
     const customMessage = await getGoodbye(id);
 
-    // Get group metadata
+    // Obtém os metadados do grupo
     const groupMetadata = await sock.groupMetadata(id);
     const groupName = groupMetadata.subject;
 
-    // Send goodbye message for each leaving participant
+    // Envia a mensagem de despedida para cada participante que saiu
     for (const participant of participants) {
         try {
-            // Handle case where participant might be an object or not a string
+            // Trata caso o participante seja um objeto ou não seja string
             const participantString = typeof participant === 'string' ? participant : (participant.id || participant.toString());
             const user = participantString.split('@')[0];
             
-            // Get user's display name
-            let displayName = user; // Default to phone number
+            // Obtém o nome exibido do usuário
+            let displayName = user; // Padrão para número de telefone
             try {
                 const contact = await sock.getBusinessProfile(participantString);
                 if (contact && contact.name) {
                     displayName = contact.name;
                 } else {
-                    // Try to get from group participants
+                    // Tenta obter dos participantes do grupo
                     const groupParticipants = groupMetadata.participants;
                     const userParticipant = groupParticipants.find(p => p.id === participantString);
                     if (userParticipant && userParticipant.name) {
@@ -51,72 +51,72 @@ async function handleLeaveEvent(sock, id, participants) {
                     }
                 }
             } catch (nameError) {
-                console.log('Could not fetch display name, using phone number');
+                console.log('Não foi possível obter o nome exibido, usando número de telefone');
             }
             
-            // Process custom message with variables
+            // Processa a mensagem personalizada com variáveis
             let finalMessage;
             if (customMessage) {
                 finalMessage = customMessage
                     .replace(/{user}/g, `@${displayName}`)
                     .replace(/{group}/g, groupName);
             } else {
-                // Default message if no custom message is set
-                finalMessage = ` *@${displayName}* we will never miss you! `;
+                // Mensagem padrão caso não haja mensagem personalizada
+                finalMessage = ` *@${displayName}* nunca sentiremos sua falta! `;
             }
             
-            // Try to send with image first (always try images)
+            // Tenta enviar com imagem primeiro (sempre tenta imagens)
             try {
-                // Get user profile picture
-                let profilePicUrl = `https://img.pyrocdn.com/dbKUgahg.png`; // Default avatar
+                // Obtém a foto de perfil do usuário
+                let profilePicUrl = `https://img.pyrocdn.com/dbKUgahg.png`; // Avatar padrão
                 try {
                     const profilePic = await sock.profilePictureUrl(participantString, 'image');
                     if (profilePic) {
                         profilePicUrl = profilePic;
                     }
                 } catch (profileError) {
-                    console.log('Could not fetch profile picture, using default');
+                    console.log('Não foi possível obter a foto de perfil, usando padrão');
                 }
                 
-                // Construct API URL for goodbye image
+                // Constrói a URL da API para a imagem de despedida
                 const apiUrl = `https://api.some-random-api.com/welcome/img/2/gaming1?type=leave&textcolor=red&username=${encodeURIComponent(displayName)}&guildName=${encodeURIComponent(groupName)}&memberCount=${groupMetadata.participants.length}&avatar=${encodeURIComponent(profilePicUrl)}`;
                 
-                // Fetch the goodbye image
+                // Busca a imagem de despedida
                 const response = await fetch(apiUrl);
                 if (response.ok) {
                     const imageBuffer = await response.buffer();
                     
-                    // Send goodbye image with caption (custom or default message)
+                    // Envia a imagem de despedida com legenda (mensagem personalizada ou padrão)
                     await sock.sendMessage(id, {
                         image: imageBuffer,
                         caption: finalMessage,
                         mentions: [participantString]
                     });
-                    continue; // Skip to next participant
+                    continue; // Pula para o próximo participante
                 }
             } catch (imageError) {
-                console.log('Image generation failed, falling back to text');
+                console.log('Falha na geração da imagem, enviando texto');
             }
             
-            // Send text message (either custom message or fallback)
+            // Envia mensagem de texto (personalizada ou fallback)
             await sock.sendMessage(id, {
                 text: finalMessage,
                 mentions: [participantString]
             });
         } catch (error) {
-            console.error('Error sending goodbye message:', error);
-            // Fallback to text message
+            console.error('Erro ao enviar mensagem de despedida:', error);
+            // Fallback para mensagem de texto
             const participantString = typeof participant === 'string' ? participant : (participant.id || participant.toString());
             const user = participantString.split('@')[0];
             
-            // Use custom message if available, otherwise use simple fallback
+            // Usa mensagem personalizada se disponível, senão fallback simples
             let fallbackMessage;
             if (customMessage) {
                 fallbackMessage = customMessage
                     .replace(/{user}/g, `@${user}`)
                     .replace(/{group}/g, groupName);
             } else {
-                fallbackMessage = `Goodbye @${user}! 👋`;
+                fallbackMessage = `Adeus @${user}! 👋`;
             }
             
             await sock.sendMessage(id, {

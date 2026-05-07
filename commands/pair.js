@@ -5,7 +5,7 @@ async function pairCommand(sock, chatId, message, q) {
     try {
         if (!q) {
             return await sock.sendMessage(chatId, {
-                text: "Please provide valid WhatsApp number\nExample: .pair 91702395XXXX",
+                text: "Por favor, forneça um número de WhatsApp válido\nExemplo: .pair 91702395XXXX",
                 contextInfo: {
                     forwardingScore: 1,
                     isForwarded: true,
@@ -24,7 +24,7 @@ async function pairCommand(sock, chatId, message, q) {
 
         if (numbers.length === 0) {
             return await sock.sendMessage(chatId, {
-                text: "Invalid number❌️ Please use the correct format!",
+                text: "Número inválido❌️ Por favor, use o formato correto!",
                 contextInfo: {
                     forwardingScore: 1,
                     isForwarded: true,
@@ -43,7 +43,7 @@ async function pairCommand(sock, chatId, message, q) {
 
             if (!result[0]?.exists) {
                 return await sock.sendMessage(chatId, {
-                    text: `That number is not registered on WhatsApp❗️`,
+                    text: `Esse número não está registrado no WhatsApp❗️`,
                     contextInfo: {
                         forwardingScore: 1,
                         isForwarded: true,
@@ -57,7 +57,7 @@ async function pairCommand(sock, chatId, message, q) {
             }
 
             await sock.sendMessage(chatId, {
-                text: "Wait a moment for the code",
+                text: "Aguarde um momento pelo código",
                 contextInfo: {
                     forwardingScore: 1,
                     isForwarded: true,
@@ -80,7 +80,7 @@ async function pairCommand(sock, chatId, message, q) {
                     
                     await sleep(5000);
                     await sock.sendMessage(chatId, {
-                        text: `Your pairing code: ${code}`,
+                        text: `Seu código de pareamento: ${code}`,
                         contextInfo: {
                             forwardingScore: 1,
                             isForwarded: true,
@@ -95,10 +95,10 @@ async function pairCommand(sock, chatId, message, q) {
                     throw new Error('Invalid response from server');
                 }
             } catch (apiError) {
-                console.error('API Error:', apiError);
+                console.error('Erro na API:', apiError);
                 const errorMessage = apiError.message === 'Service Unavailable' 
-                    ? "Service is currently unavailable. Please try again later."
-                    : "Failed to generate pairing code. Please try again later.";
+                    ? "Serviço indisponível no momento. Por favor, tente novamente mais tarde."
+                    : "Falha ao gerar o código de pareamento. Por favor, tente novamente mais tarde.";
                 
                 await sock.sendMessage(chatId, {
                     text: errorMessage,
@@ -117,7 +117,7 @@ async function pairCommand(sock, chatId, message, q) {
     } catch (error) {
         console.error(error);
         await sock.sendMessage(chatId, {
-            text: "An error occurred. Please try again later.",
+            text: "Ocorreu um erro. Por favor, tente novamente mais tarde.",
             contextInfo: {
                 forwardingScore: 1,
                 isForwarded: true,

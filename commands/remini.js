@@ -36,7 +36,7 @@ async function reminiCommand(sock, chatId, message, args) {
                 imageUrl = url;
             } else {
                 return sock.sendMessage(chatId, { 
-                    text: '❌ Invalid URL provided.\n\nUsage: `.remini https://example.com/image.jpg`' 
+                    text: '❌ URL inválida fornecida.\n\nUso: `.remini https://example.com/image.jpg`' 
                 }, { quoted: message });
             }
         } else {
@@ -45,7 +45,7 @@ async function reminiCommand(sock, chatId, message, args) {
             
             if (!imageUrl) {
                 return sock.sendMessage(chatId, { 
-                    text: '📸 *Remini AI Enhancement Command*\n\nUsage:\n• `.remini <image_url>`\n• Reply to an image with `.remini`\n• Send image with `.remini`\n\nExample: `.remini https://example.com/image.jpg`' 
+                    text: '📸 *Comando de Melhoria Remini AI*\n\nUso:\n• `.remini <url_da_imagem>`\n• Responda a uma imagem com `.remini`\n• Envie uma imagem com `.remini`\n\nExemplo: `.remini https://example.com/image.jpg`' 
                 }, { quoted: message });
             }
         }
@@ -75,35 +75,35 @@ async function reminiCommand(sock, chatId, message, args) {
                     // Send the enhanced image
                     await sock.sendMessage(chatId, {
                         image: imageResponse.data,
-                        caption: '✨ *Image enhanced successfully!*\n\n𝗘𝗡𝗛𝗔𝗡𝗖𝗘𝗗 𝗕𝗬 𝗞𝗡𝗜𝗚𝗛𝗧-𝗕𝗢𝗧'
+                        caption: '✨ *Imagem aprimorada com sucesso!*\n\n𝗘𝗡𝗛𝗔𝗡𝗖𝗘𝗗 𝗕𝗬 𝗞𝗡𝗜𝗚𝗛𝗧-𝗕𝗢𝗧'
                     }, { quoted: message });
                 } else {
-                    throw new Error('Failed to download enhanced image');
+                    throw new Error('Falha ao baixar a imagem aprimorada');
                 }
             } else {
-                throw new Error(result.message || 'Failed to enhance image');
+                throw new Error(result.message || 'Falha ao aprimorar a imagem');
             }
         } else {
-            throw new Error('API returned invalid response');
+            throw new Error('API retornou resposta inválida');
         }
 
     } catch (error) {
-        console.error('Remini Error:', error.message);
+        console.error('Erro Remini:', error.message);
         
-        let errorMessage = '❌ Failed to enhance image.';
+        let errorMessage = '❌ Falha ao aprimorar a imagem.';
         
         if (error.response?.status === 429) {
-            errorMessage = '⏰ Rate limit exceeded. Please try again later.';
+            errorMessage = '⏰ Limite de requisições excedido. Por favor, tente novamente mais tarde.';
         } else if (error.response?.status === 400) {
-            errorMessage = '❌ Invalid image URL or format.';
+            errorMessage = '❌ URL ou formato de imagem inválido.';
         } else if (error.response?.status === 500) {
-            errorMessage = '🔧 Server error. Please try again later.';
+            errorMessage = '🔧 Erro no servidor. Por favor, tente novamente mais tarde.';
         } else if (error.code === 'ECONNABORTED') {
-            errorMessage = '⏰ Request timeout. Please try again.';
+            errorMessage = '⏰ Tempo de requisição esgotado. Por favor, tente novamente.';
         } else if (error.message.includes('ENOTFOUND') || error.message.includes('ECONNREFUSED')) {
-            errorMessage = '🌐 Network error. Please check your connection.';
+            errorMessage = '🌐 Erro de rede. Por favor, verifique sua conexão.';
         } else if (error.message.includes('Error processing image')) {
-            errorMessage = '❌ Image processing failed. Please try with a different image.';
+            errorMessage = '❌ Falha no processamento da imagem. Por favor, tente com uma imagem diferente.';
         }
         
         await sock.sendMessage(chatId, { 

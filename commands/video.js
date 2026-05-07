@@ -67,7 +67,7 @@ async function videoCommand(sock, chatId, message) {
         
         
         if (!searchQuery) {
-            await sock.sendMessage(chatId, { text: 'What video do you want to download?' }, { quoted: message });
+            await sock.sendMessage(chatId, { text: 'Qual vídeo você quer baixar?' }, { quoted: message });
             return;
         }
 
@@ -81,7 +81,7 @@ async function videoCommand(sock, chatId, message) {
             // Search YouTube for the video
             const { videos } = await yts(searchQuery);
             if (!videos || videos.length === 0) {
-                await sock.sendMessage(chatId, { text: 'No videos found!' }, { quoted: message });
+                await sock.sendMessage(chatId, { text: 'Nenhum vídeo encontrado!' }, { quoted: message });
                 return;
             }
             videoUrl = videos[0].url;
@@ -97,16 +97,16 @@ async function videoCommand(sock, chatId, message) {
             if (thumb) {
                 await sock.sendMessage(chatId, {
                     image: { url: thumb },
-                    caption: `*${captionTitle}*\nDownloading...`
+                    caption: `*${captionTitle}*\nBaixando...`
                 }, { quoted: message });
             }
-        } catch (e) { console.error('[VIDEO] thumb error:', e?.message || e); }
+        } catch (e) { console.error('[VIDEO] erro na miniatura:', e?.message || e); }
         
 
         // Validate YouTube URL
         let urls = videoUrl.match(/(?:https?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch\?v=|v\/|embed\/|shorts\/|playlist\?list=)?)([a-zA-Z0-9_-]{11})/gi);
         if (!urls) {
-            await sock.sendMessage(chatId, { text: 'This is not a valid YouTube link!' }, { quoted: message });
+            await sock.sendMessage(chatId, { text: 'Este não é um link válido do YouTube!' }, { quoted: message });
             return;
         }
 
@@ -128,7 +128,7 @@ async function videoCommand(sock, chatId, message) {
                 const videoUrl_check = videoData.download || videoData.dl || videoData.url;
                 
                 if (!videoUrl_check) {
-                    console.log(`${apiMethod.name} returned no download URL, trying next API...`);
+                    console.log(`${apiMethod.name} não retornou URL de download, tentando próxima API...`);
                     continue; // Try next API
                 }
                 
@@ -136,14 +136,14 @@ async function videoCommand(sock, chatId, message) {
                 break; // Success! Exit the loop
             } catch (apiErr) {
                 // API call failed, try next API
-                console.log(`${apiMethod.name} API failed:`, apiErr.message);
+                console.log(`API ${apiMethod.name} falhou:`, apiErr.message);
                 continue;
             }
         }
         
         // If all APIs failed, throw error
         if (!downloadSuccess || !videoData) {
-            throw new Error('All download sources failed. The content may be unavailable or blocked in your region.');
+            throw new Error('Todas as fontes de download falharam. O conteúdo pode estar indisponível ou bloqueado na sua região.');
         }
 
         // Send video directly using the download URL
@@ -151,23 +151,23 @@ async function videoCommand(sock, chatId, message) {
             video: { url: videoData.download || videoData.dl || videoData.url },
             mimetype: 'video/mp4',
             fileName: `${(videoData.title || videoTitle || 'video').replace(/[^\w\s-]/g, '')}.mp4`,
-            caption: `*${videoData.title || videoTitle || 'Video'}*\n\n> *_Downloaded by Knight Bot MD_*`
+            caption: `*${videoData.title || videoTitle || 'Vídeo'}*\n\n> *_Baixado por Knight Bot MD_*`
         }, { quoted: message });
 
 
     } catch (error) {
-        console.error('[VIDEO] Command Error:', error?.message || error);
+        console.error('[VIDEO] Erro no comando:', error?.message || error);
         
         // Provide more specific error messages
-        let errorMessage = '❌ Failed to download video.';
+        let errorMessage = '❌ Falha ao baixar o vídeo.';
         if (error.message && error.message.includes('blocked')) {
-            errorMessage = '❌ Download blocked. The content may be unavailable in your region or due to legal restrictions.';
+            errorMessage = '❌ Download bloqueado. O conteúdo pode estar indisponível na sua região ou devido a restrições legais.';
         } else if (error.response?.status === 451 || error.status === 451) {
-            errorMessage = '❌ Content unavailable (451). This may be due to legal restrictions or regional blocking.';
+            errorMessage = '❌ Conteúdo indisponível (451). Isso pode ser devido a restrições legais ou bloqueio regional.';
         } else if (error.message && error.message.includes('All download sources failed')) {
-            errorMessage = '❌ All download sources failed. The content may be unavailable or blocked.';
+            errorMessage = '❌ Todas as fontes de download falharam. O conteúdo pode estar indisponível ou bloqueado.';
         } else if (error.message) {
-            errorMessage = '❌ Download failed: ' + error.message;
+            errorMessage = '❌ Falha no download: ' + error.message;
         }
         
         await sock.sendMessage(chatId, { 

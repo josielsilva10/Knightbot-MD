@@ -12,18 +12,18 @@ const scheduleFileDeletion = (filePath) => {
     setTimeout(async () => {
         try {
             await fse.remove(filePath);
-            console.log(`File deleted: ${filePath}`);
+            console.log(`Arquivo deletado: ${filePath}`);
         } catch (error) {
-            console.error(`Failed to delete file:`, error);
+            console.error(`Falha ao deletar o arquivo:`, error);
         }
-    }, 10000); // 5 minutes
+    }, 10000); // 5 minutos
 };
 
 const convertStickerToImage = async (sock, quotedMessage, chatId) => {
     try {
         const stickerMessage = quotedMessage.stickerMessage;
         if (!stickerMessage) {
-            await sock.sendMessage(chatId, { text: 'Reply to a sticker with .simage to convert it.' });
+            await sock.sendMessage(chatId, { text: 'Responda a um sticker com .simage para convertê-lo.' });
             return;
         }
 
@@ -38,13 +38,13 @@ const convertStickerToImage = async (sock, quotedMessage, chatId) => {
         await sharp(stickerFilePath).toFormat('png').toFile(outputImagePath);
 
         const imageBuffer = await fsPromises.readFile(outputImagePath);
-        await sock.sendMessage(chatId, { image: imageBuffer, caption: 'Here is the converted image!' });
+        await sock.sendMessage(chatId, { image: imageBuffer, caption: 'Aqui está a imagem convertida!' });
 
         scheduleFileDeletion(stickerFilePath);
         scheduleFileDeletion(outputImagePath);
     } catch (error) {
-        console.error('Error converting sticker to image:', error);
-        await sock.sendMessage(chatId, { text: 'An error occurred while converting the sticker.' });
+        console.error('Erro ao converter sticker para imagem:', error);
+        await sock.sendMessage(chatId, { text: 'Ocorreu um erro ao converter o sticker.' });
     }
 };
 

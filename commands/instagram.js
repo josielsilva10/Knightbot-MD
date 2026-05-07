@@ -50,7 +50,7 @@ async function instagramCommand(sock, chatId, message) {
         
         if (!text) {
             return await sock.sendMessage(chatId, { 
-                text: "Please provide an Instagram link for the video."
+                text: "Por favor, forneça um link do Instagram para o vídeo."
             });
         }
 
@@ -67,7 +67,7 @@ async function instagramCommand(sock, chatId, message) {
         
         if (!isValidUrl) {
             return await sock.sendMessage(chatId, { 
-                text: "That is not a valid Instagram link. Please provide a valid Instagram post, reel, or video link."
+                text: "Esse não é um link válido do Instagram. Por favor, forneça um link válido de post, reel ou vídeo do Instagram."
             });
         }
 
@@ -79,7 +79,7 @@ async function instagramCommand(sock, chatId, message) {
         
         if (!downloadData || !downloadData.data || downloadData.data.length === 0) {
             return await sock.sendMessage(chatId, { 
-                text: "❌ No media found at the provided link. The post might be private or the link is invalid."
+                text: "❌ Nenhuma mídia encontrada no link fornecido. O post pode ser privado ou o link é inválido."
             });
         }
 
@@ -93,7 +93,7 @@ async function instagramCommand(sock, chatId, message) {
         
         if (mediaToDownload.length === 0) {
             return await sock.sendMessage(chatId, { 
-                text: "❌ No valid media found to download. This might be a private post or the scraper failed."
+                text: "❌ Nenhuma mídia válida encontrada para download. Pode ser um post privado ou o scraper falhou."
             });
         }
 
@@ -128,15 +128,15 @@ async function instagramCommand(sock, chatId, message) {
                 }
                 
             } catch (mediaError) {
-                console.error(`Error downloading media ${i + 1}:`, mediaError);
+                console.error(`Erro ao baixar a mídia ${i + 1}:`, mediaError);
                 // Continue with next media if one fails
             }
         }
 
     } catch (error) {
-        console.error('Error in Instagram command:', error);
+        console.error('Erro no comando Instagram:', error);
         await sock.sendMessage(chatId, { 
-            text: "❌ An error occurred while processing the Instagram request. Please try again."
+            text: "❌ Ocorreu um erro ao processar a solicitação do Instagram. Por favor, tente novamente."
         });
     }
 }

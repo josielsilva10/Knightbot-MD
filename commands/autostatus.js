@@ -32,7 +32,7 @@ async function autoStatusCommand(sock, chatId, msg, args) {
         
         if (!msg.key.fromMe && !isOwner) {
             await sock.sendMessage(chatId, { 
-                text: '❌ This command can only be used by the owner!',
+                text: '❌ Este comando só pode ser usado pelo dono!',
                 ...channelInfo
             });
             return;
@@ -43,10 +43,10 @@ async function autoStatusCommand(sock, chatId, msg, args) {
 
         // If no arguments, show current status
         if (!args || args.length === 0) {
-            const status = config.enabled ? 'enabled' : 'disabled';
-            const reactStatus = config.reactOn ? 'enabled' : 'disabled';
+            const status = config.enabled ? 'ativado' : 'desativado';
+            const reactStatus = config.reactOn ? 'ativado' : 'desativado';
             await sock.sendMessage(chatId, { 
-                text: `🔄 *Auto Status Settings*\n\n📱 *Auto Status View:* ${status}\n💫 *Status Reactions:* ${reactStatus}\n\n*Commands:*\n.autostatus on - Enable auto status view\n.autostatus off - Disable auto status view\n.autostatus react on - Enable status reactions\n.autostatus react off - Disable status reactions`,
+                text: `🔄 *Configurações do Auto Status*\n\n📱 *Visualização Automática de Status:* ${status}\n💫 *Reações aos Status:* ${reactStatus}\n\n*Comandos:*\n.autostatus on - Ativar visualização automática de status\n.autostatus off - Desativar visualização automática de status\n.autostatus react on - Ativar reações aos status\n.autostatus react off - Desativar reações aos status`,
                 ...channelInfo
             });
             return;
@@ -59,21 +59,21 @@ async function autoStatusCommand(sock, chatId, msg, args) {
             config.enabled = true;
             fs.writeFileSync(configPath, JSON.stringify(config));
             await sock.sendMessage(chatId, { 
-                text: '✅ Auto status view has been enabled!\nBot will now automatically view all contact statuses.',
+                text: '✅ Visualização automática de status ativada!\nO bot agora visualizará automaticamente todos os status dos contatos.',
                 ...channelInfo
             });
         } else if (command === 'off') {
             config.enabled = false;
             fs.writeFileSync(configPath, JSON.stringify(config));
             await sock.sendMessage(chatId, { 
-                text: '❌ Auto status view has been disabled!\nBot will no longer automatically view statuses.',
+                text: '❌ Visualização automática de status desativada!\nO bot não visualizará mais os status automaticamente.',
                 ...channelInfo
             });
         } else if (command === 'react') {
             // Handle react subcommand
             if (!args[1]) {
                 await sock.sendMessage(chatId, { 
-                    text: '❌ Please specify on/off for reactions!\nUse: .autostatus react on/off',
+                    text: '❌ Por favor, especifique on/off para as reações!\nUse: .autostatus react on/off',
                     ...channelInfo
                 });
                 return;
@@ -84,33 +84,33 @@ async function autoStatusCommand(sock, chatId, msg, args) {
                 config.reactOn = true;
                 fs.writeFileSync(configPath, JSON.stringify(config));
                 await sock.sendMessage(chatId, { 
-                    text: '💫 Status reactions have been enabled!\nBot will now react to status updates.',
+                    text: '💫 Reações aos status ativadas!\nO bot agora reagirá às atualizações de status.',
                     ...channelInfo
                 });
             } else if (reactCommand === 'off') {
                 config.reactOn = false;
                 fs.writeFileSync(configPath, JSON.stringify(config));
                 await sock.sendMessage(chatId, { 
-                    text: '❌ Status reactions have been disabled!\nBot will no longer react to status updates.',
+                    text: '❌ Reações aos status desativadas!\nO bot não reagirá mais às atualizações de status.',
                     ...channelInfo
                 });
             } else {
                 await sock.sendMessage(chatId, { 
-                    text: '❌ Invalid reaction command! Use: .autostatus react on/off',
+                    text: '❌ Comando de reação inválido! Use: .autostatus react on/off',
                     ...channelInfo
                 });
             }
         } else {
             await sock.sendMessage(chatId, { 
-                text: '❌ Invalid command! Use:\n.autostatus on/off - Enable/disable auto status view\n.autostatus react on/off - Enable/disable status reactions',
+                text: '❌ Comando inválido! Use:\n.autostatus on/off - Ativar/desativar visualização automática de status\n.autostatus react on/off - Ativar/desativar reações aos status',
                 ...channelInfo
             });
         }
 
     } catch (error) {
-        console.error('Error in autostatus command:', error);
+        console.error('Erro no comando autostatus:', error);
         await sock.sendMessage(chatId, { 
-            text: '❌ Error occurred while managing auto status!\n' + error.message,
+            text: '❌ Ocorreu um erro ao gerenciar o auto status!\n' + error.message,
             ...channelInfo
         });
     }
@@ -122,7 +122,7 @@ function isAutoStatusEnabled() {
         const config = JSON.parse(fs.readFileSync(configPath));
         return config.enabled;
     } catch (error) {
-        console.error('Error checking auto status config:', error);
+        console.error('Erro ao verificar configuração do auto status:', error);
         return false;
     }
 }
@@ -133,7 +133,7 @@ function isStatusReactionEnabled() {
         const config = JSON.parse(fs.readFileSync(configPath));
         return config.reactOn;
     } catch (error) {
-        console.error('Error checking status reaction config:', error);
+        console.error('Erro ao verificar configuração de reações aos status:', error);
         return false;
     }
 }
@@ -167,7 +167,7 @@ async function reactToStatus(sock, statusKey) {
         
         // Removed success log - only keep errors
     } catch (error) {
-        console.error('❌ Error reacting to status:', error.message);
+        console.error('❌ Erro ao reagir ao status:', error.message);
     }
 }
 
@@ -195,7 +195,7 @@ async function handleStatusUpdate(sock, status) {
                     // Removed success log - only keep errors
                 } catch (err) {
                     if (err.message?.includes('rate-overlimit')) {
-                        console.log('⚠️ Rate limit hit, waiting before retrying...');
+                        console.log('⚠️ Limite de taxa atingido, aguardando antes de tentar novamente...');
                         await new Promise(resolve => setTimeout(resolve, 2000));
                         await sock.readMessages([msg.key]);
                     } else {
@@ -218,7 +218,7 @@ async function handleStatusUpdate(sock, status) {
                 // Removed success log - only keep errors
             } catch (err) {
                 if (err.message?.includes('rate-overlimit')) {
-                    console.log('⚠️ Rate limit hit, waiting before retrying...');
+                    console.log('⚠️ Limite de taxa atingido, aguardando antes de tentar novamente...');
                     await new Promise(resolve => setTimeout(resolve, 2000));
                     await sock.readMessages([status.key]);
                 } else {
@@ -240,7 +240,7 @@ async function handleStatusUpdate(sock, status) {
                 // Removed success log - only keep errors
             } catch (err) {
                 if (err.message?.includes('rate-overlimit')) {
-                    console.log('⚠️ Rate limit hit, waiting before retrying...');
+                    console.log('⚠️ Limite de taxa atingido, aguardando antes de tentar novamente...');
                     await new Promise(resolve => setTimeout(resolve, 2000));
                     await sock.readMessages([status.reaction.key]);
                 } else {
@@ -251,7 +251,7 @@ async function handleStatusUpdate(sock, status) {
         }
 
     } catch (error) {
-        console.error('❌ Error in auto status view:', error.message);
+        console.error('❌ Erro na visualização automática de status:', error.message);
     }
 }
 

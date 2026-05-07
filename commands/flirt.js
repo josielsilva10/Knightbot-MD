@@ -12,11 +12,11 @@ async function flirtCommand(sock, chatId, message) {
         const json = await res.json();
         const flirtMessage = json.result;
 
-        // Send the flirt message
+        // Enviar a mensagem de paquera
         await sock.sendMessage(chatId, { text: flirtMessage }, { quoted: message });
     } catch (error) {
-        console.error('Error in flirt command:', error);
-        await sock.sendMessage(chatId, { text: '❌ Failed to get flirt message. Please try again later!' }, { quoted: message });
+        console.error('Erro no comando flirt:', error);
+        await sock.sendMessage(chatId, { text: '❌ Falha ao obter mensagem de paquera. Por favor, tente novamente mais tarde!' }, { quoted: message });
     }
 }
 

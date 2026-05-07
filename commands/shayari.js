@@ -6,7 +6,7 @@ async function shayariCommand(sock, chatId, message) {
         const data = await response.json();
         
         if (!data || !data.result) {
-            throw new Error('Invalid response from API');
+            throw new Error('Resposta inválida da API');
         }
 
         const buttons = [
@@ -20,9 +20,9 @@ async function shayariCommand(sock, chatId, message) {
             headerType: 1
         }, { quoted: message });
     } catch (error) {
-        console.error('Error in shayari command:', error);
+        console.error('Erro no comando shayari:', error);
         await sock.sendMessage(chatId, { 
-            text: '❌ Failed to fetch shayari. Please try again later.',
+            text: '❌ Falha ao buscar shayari. Por favor, tente novamente mais tarde.',
         }, { quoted: message });
     }
 }

@@ -4,62 +4,62 @@ const fetch = require('node-fetch');
 
 const USER_GROUP_DATA = path.join(__dirname, '../data/userGroupData.json');
 
-// In-memory storage for chat history and user info
+// Armazenamento em memória para histórico de chat e informações do usuário
 const chatMemory = {
-    messages: new Map(), // Stores last 5 messages per user
-    userInfo: new Map()  // Stores user information
+    messages: new Map(), // Armazena as últimas 5 mensagens por usuário
+    userInfo: new Map()  // Armazena informações do usuário
 };
 
-// Load user group data
+// Carregar dados do grupo de usuários
 function loadUserGroupData() {
     try {
         return JSON.parse(fs.readFileSync(USER_GROUP_DATA));
     } catch (error) {
-        console.error('❌ Error loading user group data:', error.message);
+        console.error('❌ Erro ao carregar dados do grupo de usuários:', error.message);
         return { groups: [], chatbot: {} };
     }
 }
 
-// Save user group data
+// Salvar dados do grupo de usuários
 function saveUserGroupData(data) {
     try {
         fs.writeFileSync(USER_GROUP_DATA, JSON.stringify(data, null, 2));
     } catch (error) {
-        console.error('❌ Error saving user group data:', error.message);
+        console.error('❌ Erro ao salvar dados do grupo de usuários:', error.message);
     }
 }
 
-// Add random delay between 2-5 seconds
+// Adicionar atraso aleatório entre 2-5 segundos
 function getRandomDelay() {
     return Math.floor(Math.random() * 3000) + 2000;
 }
 
-// Add typing indicator
+// Adicionar indicador de digitação
 async function showTyping(sock, chatId) {
     try {
         await sock.presenceSubscribe(chatId);
         await sock.sendPresenceUpdate('composing', chatId);
         await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
     } catch (error) {
-        console.error('Typing indicator error:', error);
+        console.error('Erro no indicador de digitação:', error);
     }
 }
 
-// Extract user information from messages
+// Extrair informações do usuário das mensagens
 function extractUserInfo(message) {
     const info = {};
     
-    // Extract name
+    // Extrair nome
     if (message.toLowerCase().includes('my name is')) {
         info.name = message.split('my name is')[1].trim().split(' ')[0];
     }
     
-    // Extract age
+    // Extrair idade
     if (message.toLowerCase().includes('i am') && message.toLowerCase().includes('years old')) {
         info.age = message.match(/\d+/)?.[0];
     }
     
-    // Extract location
+    // Extrair localização
     if (message.toLowerCase().includes('i live in') || message.toLowerCase().includes('i am from')) {
         info.location = message.split(/(?:i live in|i am from)/i)[1].trim().split(/[.,!?]/)[0];
     }
@@ -71,35 +71,35 @@ async function handleChatbotCommand(sock, chatId, message, match) {
     if (!match) {
         await showTyping(sock, chatId);
         return sock.sendMessage(chatId, {
-            text: `*CHATBOT SETUP*\n\n*.chatbot on*\nEnable chatbot\n\n*.chatbot off*\nDisable chatbot in this group`,
+            text: `*CONFIGURAÇÃO DO CHATBOT*\n\n*.chatbot on*\nAtivar chatbot\n\n*.chatbot off*\nDesativar chatbot neste grupo`,
             quoted: message
         });
     }
 
     const data = loadUserGroupData();
     
-    // Get bot's number
+    // Obter número do bot
     const botNumber = sock.user.id.split(':')[0] + '@s.whatsapp.net';
     
-    // Check if sender is bot owner
+    // Verificar se o remetente é o dono do bot
     const senderId = message.key.participant || message.participant || message.pushName || message.key.remoteJid;
     const isOwner = senderId === botNumber;
 
-    // If it's the bot owner, allow access immediately
+    // Se for o dono do bot, permitir acesso imediatamente
     if (isOwner) {
         if (match === 'on') {
             await showTyping(sock, chatId);
             if (data.chatbot[chatId]) {
                 return sock.sendMessage(chatId, { 
-                    text: '*Chatbot is already enabled for this group*',
+                    text: '*O chatbot já está ativado para este grupo*',
                     quoted: message
                 });
             }
             data.chatbot[chatId] = true;
             saveUserGroupData(data);
-            console.log(`✅ Chatbot enabled for group ${chatId}`);
+            console.log(`✅ Chatbot ativado para o grupo ${chatId}`);
             return sock.sendMessage(chatId, { 
-                text: '*Chatbot has been enabled for this group*',
+                text: '*O chatbot foi ativado para este grupo*',
                 quoted: message
             });
         }
@@ -108,35 +108,35 @@ async function handleChatbotCommand(sock, chatId, message, match) {
             await showTyping(sock, chatId);
             if (!data.chatbot[chatId]) {
                 return sock.sendMessage(chatId, { 
-                    text: '*Chatbot is already disabled for this group*',
+                    text: '*O chatbot já está desativado para este grupo*',
                     quoted: message
                 });
             }
             delete data.chatbot[chatId];
             saveUserGroupData(data);
-            console.log(`✅ Chatbot disabled for group ${chatId}`);
+            console.log(`✅ Chatbot desativado para o grupo ${chatId}`);
             return sock.sendMessage(chatId, { 
-                text: '*Chatbot has been disabled for this group*',
+                text: '*O chatbot foi desativado para este grupo*',
                 quoted: message
             });
         }
     }
 
-    // For non-owners, check admin status
+    // Para não-donos, verificar status de administrador
     let isAdmin = false;
     if (chatId.endsWith('@g.us')) {
         try {
             const groupMetadata = await sock.groupMetadata(chatId);
             isAdmin = groupMetadata.participants.some(p => p.id === senderId && (p.admin === 'admin' || p.admin === 'superadmin'));
         } catch (e) {
-            console.warn('⚠️ Could not fetch group metadata. Bot might not be admin.');
+            console.warn('⚠️ Não foi possível obter metadados do grupo. O bot pode não ser administrador.');
         }
     }
 
     if (!isAdmin && !isOwner) {
         await showTyping(sock, chatId);
         return sock.sendMessage(chatId, {
-            text: '❌ Only group admins or the bot owner can use this command.',
+            text: '❌ Apenas administradores do grupo ou o dono do bot podem usar este comando.',
             quoted: message
         });
     }
@@ -145,15 +145,15 @@ async function handleChatbotCommand(sock, chatId, message, match) {
         await showTyping(sock, chatId);
         if (data.chatbot[chatId]) {
             return sock.sendMessage(chatId, { 
-                text: '*Chatbot is already enabled for this group*',
+                text: '*O chatbot já está ativado para este grupo*',
                 quoted: message
             });
         }
         data.chatbot[chatId] = true;
         saveUserGroupData(data);
-        console.log(`✅ Chatbot enabled for group ${chatId}`);
+        console.log(`✅ Chatbot ativado para o grupo ${chatId}`);
         return sock.sendMessage(chatId, { 
-            text: '*Chatbot has been enabled for this group*',
+            text: '*O chatbot foi ativado para este grupo*',
             quoted: message
         });
     }
@@ -162,22 +162,22 @@ async function handleChatbotCommand(sock, chatId, message, match) {
         await showTyping(sock, chatId);
         if (!data.chatbot[chatId]) {
             return sock.sendMessage(chatId, { 
-                text: '*Chatbot is already disabled for this group*',
+                text: '*O chatbot já está desativado para este grupo*',
                 quoted: message
             });
         }
         delete data.chatbot[chatId];
         saveUserGroupData(data);
-        console.log(`✅ Chatbot disabled for group ${chatId}`);
+        console.log(`✅ Chatbot desativado para o grupo ${chatId}`);
         return sock.sendMessage(chatId, { 
-            text: '*Chatbot has been disabled for this group*',
+            text: '*O chatbot foi desativado para este grupo*',
             quoted: message
         });
     }
 
     await showTyping(sock, chatId);
     return sock.sendMessage(chatId, { 
-        text: '*Invalid command. Use .chatbot to see usage*',
+        text: '*Comando inválido. Use .chatbot para ver o uso*',
         quoted: message
     });
 }
@@ -187,29 +187,29 @@ async function handleChatbotResponse(sock, chatId, message, userMessage, senderI
     if (!data.chatbot[chatId]) return;
 
     try {
-        // Get bot's ID - try multiple formats
+        // Obter ID do bot - tentar múltiplos formatos
         const botId = sock.user.id;
         const botNumber = botId.split(':')[0];
-        const botLid = sock.user.lid; // Get the actual LID from sock.user
+        const botLid = sock.user.lid; // Obter o LID real de sock.user
         const botJids = [
             botId,
             `${botNumber}@s.whatsapp.net`,
             `${botNumber}@whatsapp.net`,
             `${botNumber}@lid`,
-            botLid, // Add the actual LID
-            `${botLid.split(':')[0]}@lid` // Add LID without session part
+            botLid, // Adicionar o LID real
+            `${botLid.split(':')[0]}@lid` // Adicionar LID sem parte da sessão
         ];
 
-        // Check for mentions and replies
+        // Verificar menções e respostas
         let isBotMentioned = false;
         let isReplyToBot = false;
 
-        // Check if message is a reply and contains bot mention
+        // Verificar se a mensagem é uma resposta e contém menção ao bot
         if (message.message?.extendedTextMessage) {
             const mentionedJid = message.message.extendedTextMessage.contextInfo?.mentionedJid || [];
             const quotedParticipant = message.message.extendedTextMessage.contextInfo?.participant;
             
-            // Check if bot is mentioned in the reply
+            // Verificar se o bot foi mencionado na resposta
             isBotMentioned = mentionedJid.some(jid => {
                 const jidNumber = jid.split('@')[0].split(':')[0];
                 return botJids.some(botJid => {
@@ -218,9 +218,9 @@ async function handleChatbotResponse(sock, chatId, message, userMessage, senderI
                 });
             });
             
-            // Check if replying to bot's message
+            // Verificar se está respondendo à mensagem do bot
             if (quotedParticipant) {
-                // Normalize both quoted and bot IDs to compare cleanly
+                // Normalizar ambos os IDs para comparar corretamente
                 const cleanQuoted = quotedParticipant.replace(/[:@].*$/, '');
                 isReplyToBot = botJids.some(botJid => {
                     const cleanBot = botJid.replace(/[:@].*$/, '');
@@ -228,26 +228,26 @@ async function handleChatbotResponse(sock, chatId, message, userMessage, senderI
                 });
             }
         }
-        // Also check regular mentions in conversation
+        // Também verificar menções regulares na conversa
         else if (message.message?.conversation) {
             isBotMentioned = userMessage.includes(`@${botNumber}`);
         }
 
         if (!isBotMentioned && !isReplyToBot) return;
 
-        // Clean the message
+        // Limpar a mensagem
         let cleanedMessage = userMessage;
         if (isBotMentioned) {
             cleanedMessage = cleanedMessage.replace(new RegExp(`@${botNumber}`, 'g'), '').trim();
         }
 
-        // Initialize user's chat memory if not exists
+        // Inicializar memória de chat do usuário se não existir
         if (!chatMemory.messages.has(senderId)) {
             chatMemory.messages.set(senderId, []);
             chatMemory.userInfo.set(senderId, {});
         }
 
-        // Extract and update user information
+        // Extrair e atualizar informações do usuário
         const userInfo = extractUserInfo(cleanedMessage);
         if (Object.keys(userInfo).length > 0) {
             chatMemory.userInfo.set(senderId, {
@@ -256,7 +256,7 @@ async function handleChatbotResponse(sock, chatId, message, userMessage, senderI
             });
         }
 
-        // Add message to history (keep last 5 messages)
+        // Adicionar mensagem ao histórico (manter últimas 5 mensagens)
         const messages = chatMemory.messages.get(senderId);
         messages.push(cleanedMessage);
         if (messages.length > 20) {
@@ -264,10 +264,10 @@ async function handleChatbotResponse(sock, chatId, message, userMessage, senderI
         }
         chatMemory.messages.set(senderId, messages);
 
-        // Show typing indicator
+        // Mostrar indicador de digitação
         await showTyping(sock, chatId);
 
-        // Get AI response with context
+        // Obter resposta da IA com contexto
         const response = await getAIResponse(cleanedMessage, {
             messages: chatMemory.messages.get(senderId),
             userInfo: chatMemory.userInfo.get(senderId)
@@ -275,16 +275,16 @@ async function handleChatbotResponse(sock, chatId, message, userMessage, senderI
 
         if (!response) {
             await sock.sendMessage(chatId, { 
-                text: "Hmm, let me think about that... 🤔\nI'm having trouble processing your request right now.",
+                text: "Hmm, deixa eu pensar... 🤔\nEstou tendo dificuldade para processar sua solicitação agora.",
                 quoted: message
             });
             return;
         }
 
-        // Add human-like delay before sending response
+        // Adicionar atraso humano antes de enviar a resposta
         await new Promise(resolve => setTimeout(resolve, getRandomDelay()));
 
-        // Send response as a reply with proper context
+        // Enviar resposta como uma resposta com contexto adequado
         await sock.sendMessage(chatId, {
             text: response
         }, {
@@ -292,21 +292,21 @@ async function handleChatbotResponse(sock, chatId, message, userMessage, senderI
         });
 
     } catch (error) {
-        console.error('❌ Error in chatbot response:', error.message);
+        console.error('❌ Erro na resposta do chatbot:', error.message);
         
-        // Handle session errors - don't try to send error messages
+        // Tratar erros de sessão - não tentar enviar mensagens de erro
         if (error.message && error.message.includes('No sessions')) {
-            console.error('Session error in chatbot - skipping error response');
+            console.error('Erro de sessão no chatbot - ignorando resposta de erro');
             return;
         }
         
         try {
             await sock.sendMessage(chatId, { 
-                text: "Oops! 😅 I got a bit confused there. Could you try asking that again?",
+                text: "Ops! 😅 Fiquei meio confuso aqui. Pode tentar perguntar de novo?",
                 quoted: message
             });
         } catch (sendError) {
-            console.error('Failed to send chatbot error message:', sendError.message);
+            console.error('Falha ao enviar mensagem de erro do chatbot:', sendError.message);
         }
     }
 }
@@ -377,9 +377,9 @@ You:
         const data = await response.json();
         if (!data.status || !data.result) throw new Error("Invalid API response");
         
-        // Clean up the response
+        // Limpar a resposta
         let cleanedResponse = data.result.trim()
-            // Replace emoji names with actual emojis
+            // Substituir nomes de emojis por emojis reais
             .replace(/winks/g, '😉')
             .replace(/eye roll/g, '🙄')
             .replace(/shrug/g, '🤷‍♂️')
@@ -398,7 +398,7 @@ You:
             .replace(/crying/g, '😢')
             .replace(/thinking/g, '🤔')
             .replace(/sleeping/g, '😴')
-            // Remove any prompt-like text
+            // Remover qualquer texto parecido com prompt
             .replace(/Remember:.*$/g, '')
             .replace(/IMPORTANT:.*$/g, '')
             .replace(/CORE RULES:.*$/g, '')
@@ -411,18 +411,18 @@ You:
             .replace(/User information:.*$/g, '')
             .replace(/Current message:.*$/g, '')
             .replace(/You:.*$/g, '')
-            // Remove any remaining instruction-like text
+            // Remover qualquer texto restante de instruções
             .replace(/^[A-Z\s]+:.*$/gm, '')
             .replace(/^[•-]\s.*$/gm, '')
             .replace(/^✅.*$/gm, '')
             .replace(/^❌.*$/gm, '')
-            // Clean up extra whitespace
+            // Limpar espaços extras
             .replace(/\n\s*\n/g, '\n')
             .trim();
         
         return cleanedResponse;
     } catch (error) {
-        console.error("AI API error:", error);
+        console.error("Erro na API de IA:", error);
         return null;
     }
 }

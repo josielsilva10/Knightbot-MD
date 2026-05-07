@@ -6,7 +6,7 @@ const isOwnerOrSudo = require('../lib/isOwner');
 function clearDirectory(dirPath) {
     try {
         if (!fs.existsSync(dirPath)) {
-            return { success: false, message: `Directory does not exist: ${dirPath}` };
+            return { success: false, message: `Diretório não existe: ${dirPath}` };
         }
         const files = fs.readdirSync(dirPath);
         let deletedCount = 0;
@@ -22,13 +22,13 @@ function clearDirectory(dirPath) {
                 deletedCount++;
             } catch (err) {
                 // Only log errors
-                console.error(`Error deleting file ${file}:`, err);
+                console.error(`Erro ao deletar arquivo ${file}:`, err);
             }
         }
-        return { success: true, message: `Cleared ${deletedCount} files in ${path.basename(dirPath)}`, count: deletedCount };
+        return { success: true, message: `Limpeza de ${deletedCount} arquivos em ${path.basename(dirPath)}`, count: deletedCount };
     } catch (error) {
-        console.error('Error in clearDirectory:', error);
-        return { success: false, message: `Failed to clear files in ${path.basename(dirPath)}`, error: error.message };
+        console.error('Erro em clearDirectory:', error);
+        return { success: false, message: `Falha ao limpar arquivos em ${path.basename(dirPath)}`, error: error.message };
     }
 }
 
@@ -54,7 +54,7 @@ async function clearTmpCommand(sock, chatId, msg) {
         
         if (!msg.key.fromMe && !isOwner) {
             await sock.sendMessage(chatId, { 
-                text: '❌ This command is only available for the owner!' 
+                text: '❌ Este comando está disponível apenas para o dono!' 
             });
             return;
         }
@@ -72,9 +72,9 @@ async function clearTmpCommand(sock, chatId, msg) {
         }
 
     } catch (error) {
-        console.error('Error in cleartmp command:', error);
+        console.error('Erro no comando cleartmp:', error);
         await sock.sendMessage(chatId, { 
-            text: '❌ Failed to clear temporary files!' 
+            text: '❌ Falha ao limpar arquivos temporários!' 
         });
     }
 }

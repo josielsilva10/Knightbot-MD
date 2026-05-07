@@ -42,7 +42,7 @@ module.exports = {
                     imageUrl = url;
                 } else {
                     return sock.sendMessage(chatId, { 
-                        text: '❌ Invalid URL provided.\n\nUsage: `.removebg https://example.com/image.jpg`' 
+                        text: '❌ URL inválida fornecida.\n\nUso: `.removebg https://example.com/image.jpg`' 
                     }, { quoted: message });
                 }
             } else {
@@ -51,7 +51,7 @@ module.exports = {
                 
                 if (!imageUrl) {
                     return sock.sendMessage(chatId, { 
-                        text: '📸 *Remove Background Command*\n\nUsage:\n• `.removebg <image_url>`\n• Reply to an image with `.removebg`\n• Send image with `.removebg`\n\nExample: `.removebg https://example.com/image.jpg`' 
+                        text: '📸 *Comando Remover Fundo*\n\nUso:\n• `.removebg <url_da_imagem>`\n• Responda a uma imagem com `.removebg`\n• Envie uma imagem com `.removebg`\n\nExemplo: `.removebg https://example.com/image.jpg`' 
                     }, { quoted: message });
                 }
             }
@@ -72,7 +72,7 @@ module.exports = {
                 // Send the processed image
                 await sock.sendMessage(chatId, {
                     image: response.data,
-                    caption: '✨ *Background removed successfully!*\n\n𝗣𝗥𝗢𝗖𝗘𝗦𝗦𝗘𝗗 𝗕𝗬 𝗞𝗡𝗜𝗚𝗛𝗧-𝗕𝗢𝗧'
+                    caption: '✨ *Fundo removido com sucesso!*\n\n𝗣𝗥𝗢𝗖𝗘𝗦𝗦𝗔𝗗𝗢 𝗣𝗘𝗟𝗢 𝗞𝗡𝗜𝗚𝗛𝗧-𝗕𝗢𝗧'
                 }, { quoted: message });
             } else {
                 throw new Error('Failed to process image');
@@ -81,18 +81,18 @@ module.exports = {
         } catch (error) {
             console.error('RemoveBG Error:', error.message);
             
-            let errorMessage = '❌ Failed to remove background.';
+            let errorMessage = '❌ Falha ao remover o fundo.';
             
             if (error.response?.status === 429) {
-                errorMessage = '⏰ Rate limit exceeded. Please try again later.';
+                errorMessage = '⏰ Limite de requisições excedido. Por favor, tente novamente mais tarde.';
             } else if (error.response?.status === 400) {
-                errorMessage = '❌ Invalid image URL or format.';
+                errorMessage = '❌ URL ou formato da imagem inválido.';
             } else if (error.response?.status === 500) {
-                errorMessage = '🔧 Server error. Please try again later.';
+                errorMessage = '🔧 Erro no servidor. Por favor, tente novamente mais tarde.';
             } else if (error.code === 'ECONNABORTED') {
-                errorMessage = '⏰ Request timeout. Please try again.';
+                errorMessage = '⏰ Tempo de requisição esgotado. Por favor, tente novamente.';
             } else if (error.message.includes('ENOTFOUND') || error.message.includes('ECONNREFUSED')) {
-                errorMessage = '🌐 Network error. Please check your connection.';
+                errorMessage = '🌐 Erro de rede. Por favor, verifique sua conexão.';
             }
             
             await sock.sendMessage(chatId, { 

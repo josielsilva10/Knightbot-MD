@@ -31,7 +31,7 @@ async function stickerCommand(sock, chatId, message) {
 
     if (!mediaMessage) {
         await sock.sendMessage(chatId, { 
-            text: 'Please reply to an image/video with .sticker, or send an image/video with .sticker as the caption.',
+            text: 'Por favor, responda a uma imagem/vídeo com .sticker, ou envie uma imagem/vídeo com .sticker como legenda.',
             contextInfo: {
                 forwardingScore: 999,
                 isForwarded: true,
@@ -53,7 +53,7 @@ async function stickerCommand(sock, chatId, message) {
 
         if (!mediaBuffer) {
             await sock.sendMessage(chatId, { 
-                text: 'Failed to download media. Please try again.',
+                text: 'Falha ao baixar a mídia. Por favor, tente novamente.',
                 contextInfo: {
                     forwardingScore: 999,
                     isForwarded: true,
@@ -205,13 +205,13 @@ async function stickerCommand(sock, chatId, message) {
             fs.unlinkSync(tempInput);
             fs.unlinkSync(tempOutput);
         } catch (err) {
-            console.error('Error cleaning up temp files:', err);
+            console.error('Erro ao limpar arquivos temporários:', err);
         }
 
     } catch (error) {
-        console.error('Error in sticker command:', error);
+        console.error('Erro no comando sticker:', error);
         await sock.sendMessage(chatId, { 
-            text: 'Failed to create sticker! Try again later.',
+            text: 'Falha ao criar o sticker! Tente novamente mais tarde.',
             contextInfo: {
                 forwardingScore: 999,
                 isForwarded: true,

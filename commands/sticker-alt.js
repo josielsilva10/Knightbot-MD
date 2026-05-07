@@ -6,13 +6,13 @@ async function stickerCommand(sock, chatId, message) {
     try {
         const quotedMsg = message.message.extendedTextMessage?.contextInfo?.quotedMessage;
         if (!quotedMsg) {
-            await sock.sendMessage(chatId, { text: 'Please reply to an image or video!' });
+            await sock.sendMessage(chatId, { text: 'Por favor, responda a uma imagem ou vídeo!' });
             return;
         }
 
         const type = Object.keys(quotedMsg)[0];
         if (!['imageMessage', 'videoMessage'].includes(type)) {
-            await sock.sendMessage(chatId, { text: 'Please reply to an image or video!' });
+            await sock.sendMessage(chatId, { text: 'Por favor, responda a uma imagem ou vídeo!' });
             return;
         }
 
@@ -53,8 +53,8 @@ async function stickerCommand(sock, chatId, message) {
         fs.unlinkSync(tempOutput);
 
     } catch (error) {
-        console.error('Error in sticker command:', error);
-        await sock.sendMessage(chatId, { text: 'Failed to create sticker!' });
+        console.error('Erro no comando de figurinha:', error);
+        await sock.sendMessage(chatId, { text: 'Falha ao criar a figurinha!' });
     }
 }
 

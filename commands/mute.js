@@ -5,12 +5,12 @@ async function muteCommand(sock, chatId, senderId, message, durationInMinutes) {
 
     const { isSenderAdmin, isBotAdmin } = await isAdmin(sock, chatId, senderId);
     if (!isBotAdmin) {
-        await sock.sendMessage(chatId, { text: 'Please make the bot an admin first.' }, { quoted: message });
+        await sock.sendMessage(chatId, { text: 'Por favor, torne o bot um administrador primeiro.' }, { quoted: message });
         return;
     }
 
     if (!isSenderAdmin) {
-        await sock.sendMessage(chatId, { text: 'Only group admins can use the mute command.' }, { quoted: message });
+        await sock.sendMessage(chatId, { text: 'Apenas administradores do grupo podem usar o comando mute.' }, { quoted: message });
         return;
     }
 
@@ -20,23 +20,23 @@ async function muteCommand(sock, chatId, senderId, message, durationInMinutes) {
         
         if (durationInMinutes !== undefined && durationInMinutes > 0) {
             const durationInMilliseconds = durationInMinutes * 60 * 1000;
-            await sock.sendMessage(chatId, { text: `The group has been muted for ${durationInMinutes} minutes.` }, { quoted: message });
+            await sock.sendMessage(chatId, { text: `O grupo foi silenciado por ${durationInMinutes} minutos.` }, { quoted: message });
             
             // Set timeout to unmute after duration
             setTimeout(async () => {
                 try {
                     await sock.groupSettingUpdate(chatId, 'not_announcement');
-                    await sock.sendMessage(chatId, { text: 'The group has been unmuted.' });
+                    await sock.sendMessage(chatId, { text: 'O grupo foi desmutado.' });
                 } catch (unmuteError) {
-                    console.error('Error unmuting group:', unmuteError);
+                    console.error('Erro ao desmutar o grupo:', unmuteError);
                 }
             }, durationInMilliseconds);
         } else {
-            await sock.sendMessage(chatId, { text: 'The group has been muted.' }, { quoted: message });
+            await sock.sendMessage(chatId, { text: 'O grupo foi silenciado.' }, { quoted: message });
         }
     } catch (error) {
-        console.error('Error muting/unmuting the group:', error);
-        await sock.sendMessage(chatId, { text: 'An error occurred while muting/unmuting the group. Please try again.' }, { quoted: message });
+        console.error('Erro ao mutar/desmutar o grupo:', error);
+        await sock.sendMessage(chatId, { text: 'Ocorreu um erro ao mutar/desmutar o grupo. Por favor, tente novamente.' }, { quoted: message });
     }
 }
 

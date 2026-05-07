@@ -1,16 +1,16 @@
 /**
  * Knight Bot - A WhatsApp Bot
- * Autoread Command - Automatically read all messages
+ * Comando Autoleitura - Ler automaticamente todas as mensagens
  */
 
 const fs = require('fs');
 const path = require('path');
 const isOwnerOrSudo = require('../lib/isOwner');
 
-// Path to store the configuration
+// Caminho para armazenar a configuração
 const configPath = path.join(__dirname, '..', 'data', 'autoread.json');
 
-// Initialize configuration file if it doesn't exist
+// Inicializa o arquivo de configuração se não existir
 function initConfig() {
     if (!fs.existsSync(configPath)) {
         fs.writeFileSync(configPath, JSON.stringify({ enabled: false }, null, 2));
@@ -18,7 +18,7 @@ function initConfig() {
     return JSON.parse(fs.readFileSync(configPath));
 }
 
-// Toggle autoread feature
+// Alterna o recurso de autoleitura
 async function autoreadCommand(sock, chatId, message) {
     try {
         const senderId = message.key.participant || message.key.remoteJid;
@@ -26,7 +26,7 @@ async function autoreadCommand(sock, chatId, message) {
         
         if (!message.key.fromMe && !isOwner) {
             await sock.sendMessage(chatId, {
-                text: '❌ This command is only available for the owner!',
+                text: '❌ Este comando está disponível apenas para o dono!',
                 contextInfo: {
                     forwardingScore: 1,
                     isForwarded: true,
@@ -40,15 +40,15 @@ async function autoreadCommand(sock, chatId, message) {
             return;
         }
 
-        // Get command arguments
+        // Obtém os argumentos do comando
         const args = message.message?.conversation?.trim().split(' ').slice(1) || 
                     message.message?.extendedTextMessage?.text?.trim().split(' ').slice(1) || 
                     [];
         
-        // Initialize or read config
+        // Inicializa ou lê a configuração
         const config = initConfig();
         
-        // Toggle based on argument or toggle current state if no argument
+        // Alterna com base no argumento ou alterna o estado atual se não houver argumento
         if (args.length > 0) {
             const action = args[0].toLowerCase();
             if (action === 'on' || action === 'enable') {
@@ -57,7 +57,7 @@ async function autoreadCommand(sock, chatId, message) {
                 config.enabled = false;
             } else {
                 await sock.sendMessage(chatId, {
-                    text: '❌ Invalid option! Use: .autoread on/off',
+                    text: '❌ Opção inválida! Use: .autoread on/off',
                     contextInfo: {
                         forwardingScore: 1,
                         isForwarded: true,
@@ -71,16 +71,16 @@ async function autoreadCommand(sock, chatId, message) {
                 return;
             }
         } else {
-            // Toggle current state
+            // Alterna o estado atual
             config.enabled = !config.enabled;
         }
         
-        // Save updated configuration
+        // Salva a configuração atualizada
         fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
         
-        // Send confirmation message
+        // Envia mensagem de confirmação
         await sock.sendMessage(chatId, {
-            text: `✅ Auto-read has been ${config.enabled ? 'enabled' : 'disabled'}!`,
+            text: `✅ Autoleitura foi ${config.enabled ? 'ativada' : 'desativada'}!`,
             contextInfo: {
                 forwardingScore: 1,
                 isForwarded: true,
@@ -93,9 +93,9 @@ async function autoreadCommand(sock, chatId, message) {
         });
         
     } catch (error) {
-        console.error('Error in autoread command:', error);
+        console.error('Erro no comando autoread:', error);
         await sock.sendMessage(chatId, {
-            text: '❌ Error processing command!',
+            text: '❌ Erro ao processar o comando!',
             contextInfo: {
                 forwardingScore: 1,
                 isForwarded: true,
@@ -109,28 +109,28 @@ async function autoreadCommand(sock, chatId, message) {
     }
 }
 
-// Function to check if autoread is enabled
+// Função para verificar se autoleitura está ativada
 function isAutoreadEnabled() {
     try {
         const config = initConfig();
         return config.enabled;
     } catch (error) {
-        console.error('Error checking autoread status:', error);
+        console.error('Erro ao verificar status da autoleitura:', error);
         return false;
     }
 }
 
-// Function to check if bot is mentioned in a message
+// Função para verificar se o bot foi mencionado em uma mensagem
 function isBotMentionedInMessage(message, botNumber) {
     if (!message.message) return false;
     
-    // Check for mentions in contextInfo (works for all message types)
+    // Verifica menções em contextInfo (funciona para todos os tipos de mensagem)
     const messageTypes = [
         'extendedTextMessage', 'imageMessage', 'videoMessage', 'stickerMessage',
         'documentMessage', 'audioMessage', 'contactMessage', 'locationMessage'
     ];
     
-    // Check for explicit mentions in mentionedJid array
+    // Verifica menções explícitas no array mentionedJid
     for (const type of messageTypes) {
         if (message.message[type]?.contextInfo?.mentionedJid) {
             const mentionedJid = message.message[type].contextInfo.mentionedJid;
@@ -140,7 +140,7 @@ function isBotMentionedInMessage(message, botNumber) {
         }
     }
     
-    // Check for text mentions in various message types
+    // Verifica menções no texto em vários tipos de mensagem
     const textContent = 
         message.message.conversation || 
         message.message.extendedTextMessage?.text ||
@@ -148,13 +148,13 @@ function isBotMentionedInMessage(message, botNumber) {
         message.message.videoMessage?.caption || '';
     
     if (textContent) {
-        // Check for @mention format
+        // Verifica formato de @menção
         const botUsername = botNumber.split('@')[0];
         if (textContent.includes(`@${botUsername}`)) {
             return true;
         }
         
-        // Check for bot name mentions (optional, can be customized)
+        // Verifica menções pelo nome do bot (opcional, pode ser personalizado)
         const botNames = [global.botname?.toLowerCase(), 'bot', 'knight', 'knight bot'];
         const words = textContent.toLowerCase().split(/\s+/);
         if (botNames.some(name => words.includes(name))) {
@@ -165,29 +165,29 @@ function isBotMentionedInMessage(message, botNumber) {
     return false;
 }
 
-// Function to handle autoread functionality
+// Função para lidar com a funcionalidade de autoleitura
 async function handleAutoread(sock, message) {
     if (isAutoreadEnabled()) {
-        // Get bot's ID
+        // Obtém o ID do bot
         const botNumber = sock.user.id.split(':')[0] + '@s.whatsapp.net';
         
-        // Check if bot is mentioned
+        // Verifica se o bot foi mencionado
         const isBotMentioned = isBotMentionedInMessage(message, botNumber);
         
-        // If bot is mentioned, read the message internally but don't mark as read in UI
+        // Se o bot foi mencionado, lê a mensagem internamente mas não marca como lida na interface
         if (isBotMentioned) {
             
-            // We don't call sock.readMessages() here, so the message stays unread in the UI
-            return false; // Indicates message was not marked as read
+            // Não chamamos sock.readMessages() aqui, então a mensagem permanece não lida na interface
+            return false; // Indica que a mensagem não foi marcada como lida
         } else {
-            // For regular messages, mark as read normally
+            // Para mensagens normais, marca como lida normalmente
             const key = { remoteJid: message.key.remoteJid, id: message.key.id, participant: message.key.participant };
             await sock.readMessages([key]);
-            //console.log('✅ Marked message as read from ' + (message.key.participant || message.key.remoteJid).split('@')[0]);
-            return true; // Indicates message was marked as read
+            //console.log('✅ Mensagem marcada como lida de ' + (message.key.participant || message.key.remoteJid).split('@')[0]);
+            return true; // Indica que a mensagem foi marcada como lida
         }
     }
-    return false; // Autoread is disabled
+    return false; // Autoleitura está desativada
 }
 
 module.exports = {

@@ -18,7 +18,7 @@ async function tagCommand(sock, chatId, senderId, messageText, replyMessage, mes
     const { isSenderAdmin, isBotAdmin } = await isAdmin(sock, chatId, senderId);
 
     if (!isBotAdmin) {
-        await sock.sendMessage(chatId, { text: 'Please make the bot an admin first.' }, { quoted: message });
+        await sock.sendMessage(chatId, { text: 'Por favor, torne o bot um administrador primeiro.' }, { quoted: message });
         return;
     }
 
@@ -79,7 +79,7 @@ async function tagCommand(sock, chatId, senderId, messageText, replyMessage, mes
         }
     } else {
         await sock.sendMessage(chatId, {
-            text: messageText || "Tagged message",
+            text: messageText || "Mensagem marcada",
             mentions: mentionedJidList
         });
     }

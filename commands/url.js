@@ -54,7 +54,7 @@ async function urlCommand(sock, chatId, message) {
         if (!media) media = await getQuotedMediaBufferAndExt(message);
 
         if (!media) {
-            await sock.sendMessage(chatId, { text: 'Send or reply to a media (image, video, audio, sticker, document) to get a URL.' }, { quoted: message });
+            await sock.sendMessage(chatId, { text: 'Envie ou responda a uma mídia (imagem, vídeo, áudio, figurinha, documento) para obter uma URL.' }, { quoted: message });
             return;
         }
 
@@ -85,17 +85,15 @@ async function urlCommand(sock, chatId, message) {
         }
 
         if (!url) {
-            await sock.sendMessage(chatId, { text: 'Failed to upload media.' }, { quoted: message });
+            await sock.sendMessage(chatId, { text: 'Falha ao enviar a mídia.' }, { quoted: message });
             return;
         }
 
         await sock.sendMessage(chatId, { text: `URL: ${url}` }, { quoted: message });
     } catch (error) {
-        console.error('[URL] error:', error?.message || error);
-        await sock.sendMessage(chatId, { text: 'Failed to convert media to URL.' }, { quoted: message });
+        console.error('[URL] erro:', error?.message || error);
+        await sock.sendMessage(chatId, { text: 'Falha ao converter mídia para URL.' }, { quoted: message });
     }
 }
 
 module.exports = urlCommand;
-
-

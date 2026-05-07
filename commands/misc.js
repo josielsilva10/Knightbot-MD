@@ -48,8 +48,8 @@ async function handleHeart(sock, chatId, message) {
         const response = await axios.get(url, { responseType: 'arraybuffer' });
         await sock.sendMessage(chatId, { image: Buffer.from(response.data) }, { quoted: message });
     } catch (error) {
-        console.error('Error in misc heart:', error);
-        await sock.sendMessage(chatId, { text: '❌ Failed to create heart image. Try again later.' }, { quoted: message });
+        console.error('Erro no coração misc:', error);
+        await sock.sendMessage(chatId, { text: '❌ Falha ao criar imagem de coração. Tente novamente mais tarde.' }, { quoted: message });
     }
 }
 
@@ -95,7 +95,7 @@ async function miscCommand(sock, chatId, message, args) {
             case 'its-so-stupid': {
                 const dog = rest.join(' ').trim();
                 if (!dog) {
-                    await sock.sendMessage(chatId, { text: 'Usage: .misc its-so-stupid <text>' }, { quoted: message });
+                    await sock.sendMessage(chatId, { text: 'Uso: .misc its-so-stupid <texto>' }, { quoted: message });
                     return;
                 }
                 const avatarUrl = await getQuotedOrOwnImageUrl(sock, message);
@@ -110,7 +110,7 @@ async function miscCommand(sock, chatId, message, args) {
                 const joined = rest.join(' ');
                 const [username, birthday, description] = joined.split('|').map(s => (s || '').trim());
                 if (!username || !birthday) {
-                    await sock.sendMessage(chatId, { text: 'Usage: .misc namecard username|birthday|description(optional)' }, { quoted: message });
+                    await sock.sendMessage(chatId, { text: 'Uso: .misc namecard username|birthday|description(opcional)' }, { quoted: message });
                     return;
                 }
                 const avatarUrl = await getQuotedOrOwnImageUrl(sock, message);
@@ -127,7 +127,7 @@ async function miscCommand(sock, chatId, message, args) {
             case 'oogway2': {
                 const quote = rest.join(' ').trim();
                 if (!quote) {
-                    await sock.sendMessage(chatId, { text: `Usage: .misc ${sub} <quote>` }, { quoted: message });
+                    await sock.sendMessage(chatId, { text: `Uso: .misc ${sub} <citação>` }, { quoted: message });
                     return;
                 }
                 const avatarUrl = await getQuotedOrOwnImageUrl(sock, message);
@@ -142,7 +142,7 @@ async function miscCommand(sock, chatId, message, args) {
                 const joined = rest.join(' ');
                 const [displayname, username, comment, theme] = joined.split('|').map(s => (s || '').trim());
                 if (!displayname || !username || !comment) {
-                    await sock.sendMessage(chatId, { text: 'Usage: .misc tweet displayname|username|comment|theme(optional light/dark)' }, { quoted: message });
+                    await sock.sendMessage(chatId, { text: 'Uso: .misc tweet displayname|username|comment|theme(opcional light/dark)' }, { quoted: message });
                     return;
                 }
                 const avatarUrl = await getQuotedOrOwnImageUrl(sock, message);
@@ -159,7 +159,7 @@ async function miscCommand(sock, chatId, message, args) {
                 const joined = rest.join(' ');
                 const [username, comment] = joined.split('|').map(s => (s || '').trim());
                 if (!username || !comment) {
-                    await sock.sendMessage(chatId, { text: 'Usage: .misc youtube-comment username|comment' }, { quoted: message });
+                    await sock.sendMessage(chatId, { text: 'Uso: .misc youtube-comment username|comment' }, { quoted: message });
                     return;
                 }
                 const avatarUrl = await getQuotedOrOwnImageUrl(sock, message);
@@ -185,15 +185,13 @@ async function miscCommand(sock, chatId, message, args) {
             }
 
             default:
-                await sock.sendMessage(chatId, { text: 'Usage: .misc <heart|horny|circle|lgbt|lesbian|nonbinary|pansexual|transgender|lied|lolice|simpcard|tonikawa|its-so-stupid <text>|namecard u|b|d?|nobitches <text>|oogway <q>|oogway2 <q>|tweet dn|un|c|theme?|youtube-comment un|c>' }, { quoted: message });
+                await sock.sendMessage(chatId, { text: 'Uso: .misc <heart|horny|circle|lgbt|lesbian|nonbinary|pansexual|transgender|lied|lolice|simpcard|tonikawa|its-so-stupid <texto>|namecard u|b|d?|nobitches <texto>|oogway <c>|oogway2 <c>|tweet dn|un|c|theme?|youtube-comment un|c>' }, { quoted: message });
                 break;
         }
     } catch (error) {
-        console.error('Error in misc command:', error);
-        await sock.sendMessage(chatId, { text: '❌ Failed to generate image. Check your parameters and try again.' }, { quoted: message });
+        console.error('Erro no comando misc:', error);
+        await sock.sendMessage(chatId, { text: '❌ Falha ao gerar imagem. Verifique seus parâmetros e tente novamente.' }, { quoted: message });
     }
 }
 
 module.exports = { miscCommand, handleHeart };
-
-

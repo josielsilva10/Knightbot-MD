@@ -21,20 +21,20 @@ async function groupInfoCommand(sock, chatId, msg) {
 
         // Create info text
         const text = `
-┌──「 *INFO GROUP* 」
+┌──「 *INFORMAÇÕES DO GRUPO* 」
 ▢ *♻️ID:*
    • ${groupMetadata.id}
-▢ *🔖NAME* : 
+▢ *🔖NOME* : 
 • ${groupMetadata.subject}
-▢ *👥Members* :
+▢ *👥Membros* :
 • ${participants.length}
-▢ *🤿Group Owner:*
+▢ *🤿Dono do Grupo:*
 • @${owner.split('@')[0]}
 ▢ *🕵🏻‍♂️Admins:*
 ${listAdmin}
 
-▢ *📌Description* :
-   • ${groupMetadata.desc?.toString() || 'No description'}
+▢ *📌Descrição* :
+   • ${groupMetadata.desc?.toString() || 'Sem descrição'}
 `.trim();
 
         // Send the message with image and mentions
@@ -45,8 +45,8 @@ ${listAdmin}
         });
 
     } catch (error) {
-        console.error('Error in groupinfo command:', error);
-        await sock.sendMessage(chatId, { text: 'Failed to get group info!' });
+        console.error('Erro no comando groupinfo:', error);
+        await sock.sendMessage(chatId, { text: 'Falha ao obter informações do grupo!' });
     }
 }
 

@@ -5,7 +5,7 @@ async function demoteCommand(sock, chatId, mentionedJids, message) {
         // First check if it's a group
         if (!chatId.endsWith('@g.us')) {
             await sock.sendMessage(chatId, { 
-                text: 'This command can only be used in groups!'
+                text: 'Este comando só pode ser usado em grupos!'
             });
             return;
         }
@@ -16,21 +16,21 @@ async function demoteCommand(sock, chatId, mentionedJids, message) {
             
             if (!adminStatus.isBotAdmin) {
                 await sock.sendMessage(chatId, { 
-                    text: '❌ Error: Please make the bot an admin first to use this command.'
+                    text: '❌ Erro: Por favor, torne o bot um administrador primeiro para usar este comando.'
                 });
                 return;
             }
 
             if (!adminStatus.isSenderAdmin) {
                 await sock.sendMessage(chatId, { 
-                    text: '❌ Error: Only group admins can use the demote command.'
+                    text: '❌ Erro: Apenas administradores do grupo podem usar o comando de rebaixar.'
                 });
                 return;
             }
         } catch (adminError) {
-            console.error('Error checking admin status:', adminError);
+            console.error('Erro ao verificar status de administrador:', adminError);
             await sock.sendMessage(chatId, { 
-                text: '❌ Error: Please make sure the bot is an admin of this group.'
+                text: '❌ Erro: Por favor, certifique-se de que o bot é um administrador deste grupo.'
             });
             return;
         }
@@ -49,7 +49,7 @@ async function demoteCommand(sock, chatId, mentionedJids, message) {
         // If no user found through either method
         if (userToDemote.length === 0) {
             await sock.sendMessage(chatId, { 
-                text: '❌ Error: Please mention the user or reply to their message to demote!'
+                text: '❌ Erro: Por favor, mencione o usuário ou responda à mensagem dele para rebaixar!'
             });
             return;
         }
@@ -67,34 +67,34 @@ async function demoteCommand(sock, chatId, mentionedJids, message) {
         // Add delay to avoid rate limiting
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        const demotionMessage = `*『 GROUP DEMOTION 』*\n\n` +
-            `👤 *Demoted User${userToDemote.length > 1 ? 's' : ''}:*\n` +
+        const demotionMessage = `*『 REBAIXAMENTO NO GRUPO 』*\n\n` +
+            `👤 *Usuário Rebaixado${userToDemote.length > 1 ? 's' : ''}:*\n` +
             `${usernames.map(name => `• ${name}`).join('\n')}\n\n` +
-            `👑 *Demoted By:* @${message.key.participant ? message.key.participant.split('@')[0] : message.key.remoteJid.split('@')[0]}\n\n` +
-            `📅 *Date:* ${new Date().toLocaleString()}`;
+            `👑 *Rebaixado Por:* @${message.key.participant ? message.key.participant.split('@')[0] : message.key.remoteJid.split('@')[0]}\n\n` +
+            `📅 *Data:* ${new Date().toLocaleString()}`;
         
         await sock.sendMessage(chatId, { 
             text: demotionMessage,
             mentions: [...userToDemote, message.key.participant || message.key.remoteJid]
         });
     } catch (error) {
-        console.error('Error in demote command:', error);
+        console.error('Erro no comando de rebaixar:', error);
         if (error.data === 429) {
             await new Promise(resolve => setTimeout(resolve, 2000));
             try {
                 await sock.sendMessage(chatId, { 
-                    text: '❌ Rate limit reached. Please try again in a few seconds.'
+                    text: '❌ Limite de requisições atingido. Por favor, tente novamente em alguns segundos.'
                 });
             } catch (retryError) {
-                console.error('Error sending retry message:', retryError);
+                console.error('Erro ao enviar mensagem de nova tentativa:', retryError);
             }
         } else {
             try {
                 await sock.sendMessage(chatId, { 
-                    text: '❌ Failed to demote user(s). Make sure the bot is admin and has sufficient permissions.'
+                    text: '❌ Falha ao rebaixar usuário(s). Certifique-se de que o bot é administrador e tem permissões suficientes.'
                 });
             } catch (sendError) {
-                console.error('Error sending error message:', sendError);
+                console.error('Erro ao enviar mensagem de erro:', sendError);
             }
         }
     }
@@ -130,24 +130,24 @@ async function handleDemotionEvent(sock, groupId, participants, author) {
             demotedBy = `@${authorJid.split('@')[0]}`;
             mentionList.push(authorJid);
         } else {
-            demotedBy = 'System';
+            demotedBy = 'Sistema';
         }
 
         // Add delay to avoid rate limiting
         await new Promise(resolve => setTimeout(resolve, 1000));
 
-        const demotionMessage = `*『 GROUP DEMOTION 』*\n\n` +
-            `👤 *Demoted User${participants.length > 1 ? 's' : ''}:*\n` +
+        const demotionMessage = `*『 REBAIXAMENTO NO GRUPO 』*\n\n` +
+            `👤 *Usuário Rebaixado${participants.length > 1 ? 's' : ''}:*\n` +
             `${demotedUsernames.map(name => `• ${name}`).join('\n')}\n\n` +
-            `👑 *Demoted By:* ${demotedBy}\n\n` +
-            `📅 *Date:* ${new Date().toLocaleString()}`;
+            `👑 *Rebaixado Por:* ${demotedBy}\n\n` +
+            `📅 *Data:* ${new Date().toLocaleString()}`;
         
         await sock.sendMessage(groupId, {
             text: demotionMessage,
             mentions: mentionList
         });
     } catch (error) {
-        console.error('Error handling demotion event:', error);
+        console.error('Erro ao lidar com evento de rebaixamento:', error);
         if (error.data === 429) {
             await new Promise(resolve => setTimeout(resolve, 2000));
         }

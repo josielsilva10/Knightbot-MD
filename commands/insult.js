@@ -1,39 +1,39 @@
 const insults = [
-    "You're like a cloud. When you disappear, it's a beautiful day!",
-    "You bring everyone so much joy when you leave the room!",
-    "I'd agree with you, but then we'd both be wrong.",
-    "You're not stupid; you just have bad luck thinking.",
-    "Your secrets are always safe with me. I never even listen to them.",
-    "You're proof that even evolution takes a break sometimes.",
-    "You have something on your chin... no, the third one down.",
-    "You're like a software update. Whenever I see you, I think, 'Do I really need this right now?'",
-    "You bring everyone happiness... you know, when you leave.",
-    "You're like a penny—two-faced and not worth much.",
-    "You have something on your mind... oh wait, never mind.",
-    "You're the reason they put directions on shampoo bottles.",
-    "You're like a cloud. Always floating around with no real purpose.",
-    "Your jokes are like expired milk—sour and hard to digest.",
-    "You're like a candle in the wind... useless when things get tough.",
-    "You have something unique—your ability to annoy everyone equally.",
-    "You're like a Wi-Fi signal—always weak when needed most.",
-    "You're proof that not everyone needs a filter to be unappealing.",
-    "Your energy is like a black hole—it just sucks the life out of the room.",
-    "You have the perfect face for radio.",
-    "You're like a traffic jam—nobody wants you, but here you are.",
-    "You're like a broken pencil—pointless.",
-    "Your ideas are so original, I'm sure I've heard them all before.",
-    "You're living proof that even mistakes can be productive.",
-    "You're not lazy; you're just highly motivated to do nothing.",
-    "Your brain's running Windows 95—slow and outdated.",
-    "You're like a speed bump—nobody likes you, but everyone has to deal with you.",
-    "You're like a cloud of mosquitoes—just irritating.",
-    "You bring people together... to talk about how annoying you are."
+"Você é como uma nuvem. Quando você desaparece, o dia fica lindo!",
+"Você traz tanta alegria para todos quando sai da sala!",
+"Eu concordaria com você, mas aí nós dois estaríamos errados.",
+"Você não é burro; você só tem má sorte ao pensar.",
+"Seus segredos estão sempre seguros comigo. Eu nem sequer escuto eles.",
+"Você é a prova de que até a evolução tira uma folga às vezes.",
+"Você tem algo no queixo... não, o terceiro para baixo.",
+"Você é como uma atualização de software. Sempre que te vejo, penso: 'Eu realmente preciso disso agora?'",
+"Você traz felicidade para todos... sabe, quando você vai embora.",
+"Você é como uma moeda—duas caras e não vale muito.",
+"Você tem algo na cabeça... ah, deixa pra lá.",
+"Você é a razão pela qual colocam instruções nas embalagens de shampoo.",
+"Você é como uma nuvem. Sempre flutuando sem um propósito real.",
+"Suas piadas são como leite vencido—azedas e difíceis de digerir.",
+"Você é como uma vela ao vento... inútil quando as coisas ficam difíceis.",
+"Você tem algo único—sua habilidade de irritar todo mundo igualmente.",
+"Você é como um sinal de Wi-Fi—sempre fraco quando mais precisa.",
+"Você é a prova de que nem todo mundo precisa de filtro para ser desagradável.",
+"Sua energia é como um buraco negro—suga a vida da sala.",
+"Você tem a cara perfeita para rádio.",
+"Você é como um engarrafamento—ninguém te quer, mas aqui está você.",
+"Você é como um lápis quebrado—inútil.",
+"Suas ideias são tão originais, tenho certeza que já ouvi todas antes.",
+"Você é a prova viva de que até erros podem ser produtivos.",
+"Você não é preguiçoso; está apenas altamente motivado a não fazer nada.",
+"Seu cérebro roda Windows 95—lento e ultrapassado.",
+"Você é como um quebra-molas—ninguém gosta de você, mas todos têm que lidar com você.",
+"Você é como uma nuvem de mosquitos—apenas irritante.",
+"Você junta as pessoas... para falar sobre o quanto você é chato."
 ];
 
 async function insultCommand(sock, chatId, message) {
     try {
         if (!message || !chatId) {
-            console.log('Invalid message or chatId:', { message, chatId });
+            console.log('Mensagem ou chatId inválidos:', { message, chatId });
             return;
         }
 
@@ -50,7 +50,7 @@ async function insultCommand(sock, chatId, message) {
         
         if (!userToInsult) {
             await sock.sendMessage(chatId, { 
-                text: 'Please mention someone or reply to their message to insult them!'
+                text: 'Por favor, mencione alguém ou responda a mensagem deles para insultá-los!'
             });
             return;
         }
@@ -61,27 +61,27 @@ async function insultCommand(sock, chatId, message) {
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         await sock.sendMessage(chatId, { 
-            text: `Hey @${userToInsult.split('@')[0]}, ${insult}`,
+            text: `Ei @${userToInsult.split('@')[0]}, ${insult}`,
             mentions: [userToInsult]
         });
     } catch (error) {
-        console.error('Error in insult command:', error);
+        console.error('Erro no comando insult:', error);
         if (error.data === 429) {
             await new Promise(resolve => setTimeout(resolve, 2000));
             try {
                 await sock.sendMessage(chatId, { 
-                    text: 'Please try again in a few seconds.'
+                    text: 'Por favor, tente novamente em alguns segundos.'
                 });
             } catch (retryError) {
-                console.error('Error sending retry message:', retryError);
+                console.error('Erro ao enviar mensagem de tentativa:', retryError);
             }
         } else {
             try {
                 await sock.sendMessage(chatId, { 
-                    text: 'An error occurred while sending the insult.'
+                    text: 'Ocorreu um erro ao enviar o insulto.'
                 });
             } catch (sendError) {
-                console.error('Error sending error message:', sendError);
+                console.error('Erro ao enviar mensagem de erro:', sendError);
             }
         }
     }

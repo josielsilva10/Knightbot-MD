@@ -12,10 +12,10 @@ module.exports = async function quoteCommand(sock, chatId, message) {
         const json = await res.json();
         const quoteMessage = json.result;
 
-        // Send the quote message
+        // Enviar a mensagem da citação
         await sock.sendMessage(chatId, { text: quoteMessage }, { quoted: message });
     } catch (error) {
-        console.error('Error in quote command:', error);
-        await sock.sendMessage(chatId, { text: '❌ Failed to get quote. Please try again later!' }, { quoted: message });
+        console.error('Erro no comando de citação:', error);
+        await sock.sendMessage(chatId, { text: '❌ Falha ao obter a citação. Por favor, tente novamente mais tarde!' }, { quoted: message });
     }
 };

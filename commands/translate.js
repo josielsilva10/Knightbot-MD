@@ -26,7 +26,7 @@ async function handleTranslateCommand(sock, chatId, message, match) {
             const args = match.trim().split(' ');
             if (args.length < 2) {
                 return sock.sendMessage(chatId, {
-                    text: `*TRANSLATOR*\n\nUsage:\n1. Reply to a message with: .translate <lang> or .trt <lang>\n2. Or type: .translate <text> <lang> or .trt <text> <lang>\n\nExample:\n.translate hello fr\n.trt hello fr\n\nLanguage codes:\nfr - French\nes - Spanish\nde - German\nit - Italian\npt - Portuguese\nru - Russian\nja - Japanese\nko - Korean\nzh - Chinese\nar - Arabic\nhi - Hindi`,
+                    text: `*TRADUTOR*\n\nUso:\n1. Responda a uma mensagem com: .translate <idioma> ou .trt <idioma>\n2. Ou digite: .translate <texto> <idioma> ou .trt <texto> <idioma>\n\nExemplo:\n.translate olá fr\n.trt olá fr\n\nCódigos de idiomas:\nfr - Francês\nes - Espanhol\nde - Alemão\nit - Italiano\npt - Português\nru - Russo\nja - Japonês\nko - Coreano\nzh - Chinês\nar - Árabe\nhi - Hindi`,
                     quoted: message
                 });
             }
@@ -37,7 +37,7 @@ async function handleTranslateCommand(sock, chatId, message, match) {
 
         if (!textToTranslate) {
             return sock.sendMessage(chatId, {
-                text: '❌ No text found to translate. Please provide text or reply to a message.',
+                text: '❌ Nenhum texto encontrado para traduzir. Por favor, forneça um texto ou responda a uma mensagem.',
                 quoted: message
             });
         }
@@ -101,9 +101,9 @@ async function handleTranslateCommand(sock, chatId, message, match) {
         });
 
     } catch (error) {
-        console.error('❌ Error in translate command:', error);
+        console.error('❌ Erro no comando de tradução:', error);
         await sock.sendMessage(chatId, {
-            text: '❌ Failed to translate text. Please try again later.\n\nUsage:\n1. Reply to a message with: .translate <lang> or .trt <lang>\n2. Or type: .translate <text> <lang> or .trt <text> <lang>',
+            text: '❌ Falha ao traduzir o texto. Por favor, tente novamente mais tarde.\n\nUso:\n1. Responda a uma mensagem com: .translate <idioma> ou .trt <idioma>\n2. Ou digite: .translate <texto> <idioma> ou .trt <texto> <idioma>',
             quoted: message
         });
     }

@@ -28,7 +28,7 @@ const getFolderSizeInMB = (folderPath) => {
 
         return totalSize / (1024 * 1024); // Convert bytes to MB
     } catch (err) {
-        console.error('Error getting folder size:', err);
+        console.error('Erro ao obter o tamanho da pasta:', err);
         return 0;
     }
 };
@@ -46,7 +46,7 @@ const cleanTempFolderIfLarge = () => {
             }
         }
     } catch (err) {
-        console.error('Temp cleanup error:', err);
+        console.error('Erro na limpeza temporária:', err);
     }
 };
 
@@ -68,7 +68,7 @@ function saveAntideleteConfig(config) {
     try {
         fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
     } catch (err) {
-        console.error('Config save error:', err);
+        console.error('Erro ao salvar configuração:', err);
     }
 }
 
@@ -80,14 +80,14 @@ async function handleAntideleteCommand(sock, chatId, message, match) {
     const isOwner = await isOwnerOrSudo(senderId, sock, chatId);
     
     if (!message.key.fromMe && !isOwner) {
-        return sock.sendMessage(chatId, { text: '*Only the bot owner can use this command.*' }, { quoted: message });
+        return sock.sendMessage(chatId, { text: '*Apenas o dono do bot pode usar este comando.*' }, { quoted: message });
     }
 
     const config = loadAntideleteConfig();
 
     if (!match) {
         return sock.sendMessage(chatId, {
-            text: `*ANTIDELETE SETUP*\n\nCurrent Status: ${config.enabled ? '✅ Enabled' : '❌ Disabled'}\n\n*.antidelete on* - Enable\n*.antidelete off* - Disable`
+            text: `*CONFIGURAÇÃO DO ANTIDELETE*\n\nStatus Atual: ${config.enabled ? '✅ Ativado' : '❌ Desativado'}\n\n*.antidelete on* - Ativar\n*.antidelete off* - Desativar`
         }, {quoted: message});
     }
 
@@ -96,11 +96,11 @@ async function handleAntideleteCommand(sock, chatId, message, match) {
     } else if (match === 'off') {
         config.enabled = false;
     } else {
-        return sock.sendMessage(chatId, { text: '*Invalid command. Use .antidelete to see usage.*' }, {quoted:message});
+        return sock.sendMessage(chatId, { text: '*Comando inválido. Use .antidelete para ver o uso.*' }, {quoted:message});
     }
 
     saveAntideleteConfig(config);
-    return sock.sendMessage(chatId, { text: `*Antidelete ${match === 'on' ? 'enabled' : 'disabled'}*` }, {quoted:message});
+    return sock.sendMessage(chatId, { text: `*Antidelete ${match === 'on' ? 'ativado' : 'desativado'}*` }, {quoted:message});
 }
 
 // Store incoming messages (also handles anti-view-once by forwarding immediately)
@@ -183,8 +183,7 @@ async function storeMessage(sock, message) {
                 const ownerNumber = sock.user.id.split(':')[0] + '@s.whatsapp.net';
                 const senderName = sender.split('@')[0];
                 const mediaOptions = {
-                    caption: `*Anti-ViewOnce ${mediaType}*
-From: @${senderName}`,
+                    caption: `*Anti-ViewOnce ${mediaType}*\nDe: @${senderName}`,
                     mentions: [sender]
                 };
                 if (mediaType === 'image') {
@@ -200,7 +199,7 @@ From: @${senderName}`,
         }
 
     } catch (err) {
-        console.error('storeMessage error:', err);
+        console.error('Erro ao armazenar mensagem:', err);
     }
 }
 
@@ -229,16 +228,16 @@ async function handleMessageRevocation(sock, revocationMessage) {
             day: '2-digit', month: '2-digit', year: 'numeric'
         });
 
-        let text = `*🔰 ANTIDELETE REPORT 🔰*\n\n` +
-            `*🗑️ Deleted By:* @${deletedBy.split('@')[0]}\n` +
-            `*👤 Sender:* @${senderName}\n` +
-            `*📱 Number:* ${sender}\n` +
-            `*🕒 Time:* ${time}\n`;
+        let text = `*🔰 RELATÓRIO ANTIDELETE 🔰*\n\n` +
+            `*🗑️ Deletado por:* @${deletedBy.split('@')[0]}\n` +
+            `*👤 Remetente:* @${senderName}\n` +
+            `*📱 Número:* ${sender}\n` +
+            `*🕒 Horário:* ${time}\n`;
 
-        if (groupName) text += `*👥 Group:* ${groupName}\n`;
+        if (groupName) text += `*👥 Grupo:* ${groupName}\n`;
 
         if (original.content) {
-            text += `\n*💬 Deleted Message:*\n${original.content}`;
+            text += `\n*💬 Mensagem deletada:*\n${original.content}`;
         }
 
         await sock.sendMessage(ownerNumber, {
@@ -249,7 +248,7 @@ async function handleMessageRevocation(sock, revocationMessage) {
         // Media sending
         if (original.mediaType && fs.existsSync(original.mediaPath)) {
             const mediaOptions = {
-                caption: `*Deleted ${original.mediaType}*\nFrom: @${senderName}`,
+                caption: `*${original.mediaType.charAt(0).toUpperCase() + original.mediaType.slice(1)} deletado*\nDe: @${senderName}`,
                 mentions: [sender]
             };
 
@@ -284,7 +283,7 @@ async function handleMessageRevocation(sock, revocationMessage) {
                 }
             } catch (err) {
                 await sock.sendMessage(ownerNumber, {
-                    text: `⚠️ Error sending media: ${err.message}`
+                    text: `⚠️ Erro ao enviar mídia: ${err.message}`
                 });
             }
 
@@ -292,14 +291,14 @@ async function handleMessageRevocation(sock, revocationMessage) {
             try {
                 fs.unlinkSync(original.mediaPath);
             } catch (err) {
-                console.error('Media cleanup error:', err);
+                console.error('Erro na limpeza da mídia:', err);
             }
         }
 
         messageStore.delete(messageId);
 
     } catch (err) {
-        console.error('handleMessageRevocation error:', err);
+        console.error('Erro ao lidar com revogação de mensagem:', err);
     }
 }
 

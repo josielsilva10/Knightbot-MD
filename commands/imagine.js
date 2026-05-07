@@ -12,7 +12,7 @@ async function imagineCommand(sock, chatId, message) {
         
         if (!imagePrompt) {
             await sock.sendMessage(chatId, {
-                text: 'Please provide a prompt for the image generation.\nExample: .imagine a beautiful sunset over mountains'
+                text: 'Por favor, forneça um prompt para a geração da imagem.\nExemplo: .imagine um lindo pôr do sol sobre as montanhas'
             }, {
                 quoted: message
             });
@@ -21,7 +21,7 @@ async function imagineCommand(sock, chatId, message) {
 
         // Send processing message
         await sock.sendMessage(chatId, {
-            text: '🎨 Generating your image... Please wait.'
+            text: '🎨 Gerando sua imagem... Por favor, aguarde.'
         }, {
             quoted: message
         });
@@ -40,15 +40,15 @@ async function imagineCommand(sock, chatId, message) {
         // Send the generated image
         await sock.sendMessage(chatId, {
             image: imageBuffer,
-            caption: `🎨 Generated image for prompt: "${imagePrompt}"`
+            caption: `🎨 Imagem gerada para o prompt: "${imagePrompt}"`
         }, {
             quoted: message
         });
 
     } catch (error) {
-        console.error('Error in imagine command:', error);
+        console.error('Erro no comando imagine:', error);
         await sock.sendMessage(chatId, {
-            text: '❌ Failed to generate image. Please try again later.'
+            text: '❌ Falha ao gerar a imagem. Por favor, tente novamente mais tarde.'
         }, {
             quoted: message
         });

@@ -42,7 +42,7 @@ function downloadFile(url, dest, visited = new Set()) {
         try {
             // Avoid infinite redirect loops
             if (visited.has(url) || visited.size > 5) {
-                return reject(new Error('Too many redirects'));
+                return reject(new Error('Muitas redirecionamentos'));
             }
             visited.add(url);
 
@@ -57,7 +57,7 @@ function downloadFile(url, dest, visited = new Set()) {
                 // Handle redirects
                 if ([301, 302, 303, 307, 308].includes(res.statusCode)) {
                     const location = res.headers.location;
-                    if (!location) return reject(new Error(`HTTP ${res.statusCode} without Location`));
+                    if (!location) return reject(new Error(`HTTP ${res.statusCode} sem Location`));
                     const nextUrl = new URL(location, url).toString();
                     res.resume();
                     return downloadFile(nextUrl, dest, visited).then(resolve).catch(reject);
@@ -107,7 +107,7 @@ async function extractZip(zipPath, outDir) {
         await run(`busybox unzip -o '${zipPath}' -d '${outDir}'`);
         return;
     } catch {}
-    throw new Error("No system unzip tool found (unzip/7z/busybox). Git mode is recommended on this panel.");
+    throw new Error("Nenhuma ferramenta de descompactação do sistema encontrada (unzip/7z/busybox). O modo Git é recomendado neste painel.");
 }
 
 function copyRecursive(src, dest, ignore = [], relative = '', outList = []) {
@@ -129,7 +129,7 @@ function copyRecursive(src, dest, ignore = [], relative = '', outList = []) {
 async function updateViaZip(sock, chatId, message, zipOverride) {
     const zipUrl = (zipOverride || settings.updateZipUrl || process.env.UPDATE_ZIP_URL || '').trim();
     if (!zipUrl) {
-        throw new Error('No ZIP URL configured. Set settings.updateZipUrl or UPDATE_ZIP_URL env.');
+        throw new Error('Nenhuma URL de ZIP configurada. Defina settings.updateZipUrl ou a variável de ambiente UPDATE_ZIP_URL.');
     }
     const tmpDir = path.join(process.cwd(), 'tmp');
     if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
@@ -176,7 +176,7 @@ async function updateViaZip(sock, chatId, message, zipOverride) {
 
 async function restartProcess(sock, chatId, message) {
     try {
-        await sock.sendMessage(chatId, { text: '✅ Update complete! Restarting…' }, { quoted: message });
+        await sock.sendMessage(chatId, { text: '✅ Atualização concluída! Reiniciando…' }, { quoted: message });
     } catch {}
     try {
         // Preferred: PM2
@@ -195,18 +195,18 @@ async function updateCommand(sock, chatId, message, zipOverride) {
     const isOwner = await isOwnerOrSudo(senderId, sock, chatId);
     
     if (!message.key.fromMe && !isOwner) {
-        await sock.sendMessage(chatId, { text: 'Only bot owner or sudo can use .update' }, { quoted: message });
+        await sock.sendMessage(chatId, { text: 'Apenas o dono do bot ou sudo pode usar .update' }, { quoted: message });
         return;
     }
     try {
         // Minimal UX
-        await sock.sendMessage(chatId, { text: '🔄 Updating the bot, please wait…' }, { quoted: message });
+        await sock.sendMessage(chatId, { text: '🔄 Atualizando o bot, por favor aguarde…' }, { quoted: message });
         if (await hasGitRepo()) {
             // silent
             const { oldRev, newRev, alreadyUpToDate, commits, files } = await updateViaGit();
             // Short message only: version info
-            const summary = alreadyUpToDate ? `✅ Already up to date: ${newRev}` : `✅ Updated to ${newRev}`;
-            console.log('[update] summary generated');
+            const summary = alreadyUpToDate ? `✅ Já está atualizado: ${newRev}` : `✅ Atualizado para ${newRev}`;
+            console.log('[update] resumo gerado');
             // silent
             await run('npm install --no-audit --no-fund');
         } else {
@@ -215,17 +215,15 @@ async function updateCommand(sock, chatId, message, zipOverride) {
         }
         try {
             const v = require('../settings').version || '';
-            await sock.sendMessage(chatId, { text: `✅ Update done. Restarting…` }, { quoted: message });
+            await sock.sendMessage(chatId, { text: `✅ Atualização concluída. Reiniciando…` }, { quoted: message });
         } catch {
-            await sock.sendMessage(chatId, { text: '✅ Restared Successfully\n Type .ping to check latest version.' }, { quoted: message });
+            await sock.sendMessage(chatId, { text: '✅ Reiniciado com sucesso\n Digite .ping para verificar a versão mais recente.' }, { quoted: message });
         }
         await restartProcess(sock, chatId, message);
     } catch (err) {
-        console.error('Update failed:', err);
-        await sock.sendMessage(chatId, { text: `❌ Update failed:\n${String(err.message || err)}` }, { quoted: message });
+        console.error('Falha na atualização:', err);
+        await sock.sendMessage(chatId, { text: `❌ Falha na atualização:\n${String(err.message || err)}` }, { quoted: message });
     }
 }
 
 module.exports = updateCommand;
-
-

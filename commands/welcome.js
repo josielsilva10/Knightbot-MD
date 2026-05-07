@@ -6,7 +6,7 @@ const fetch = require('node-fetch');
 async function welcomeCommand(sock, chatId, message, match) {
     // Check if it's a group
     if (!chatId.endsWith('@g.us')) {
-        await sock.sendMessage(chatId, { text: 'This command can only be used in groups.' });
+        await sock.sendMessage(chatId, { text: 'Este comando só pode ser usado em grupos.' });
         return;
     }
 
@@ -29,7 +29,7 @@ async function handleJoinEvent(sock, id, participants) {
     // Get group metadata
     const groupMetadata = await sock.groupMetadata(id);
     const groupName = groupMetadata.subject;
-    const groupDesc = groupMetadata.desc || 'No description available';
+    const groupDesc = groupMetadata.desc || 'Nenhuma descrição disponível';
 
     // Send welcome message for each new participant
     for (const participant of participants) {
@@ -53,7 +53,7 @@ async function handleJoinEvent(sock, id, participants) {
                     }
                 }
             } catch (nameError) {
-                console.log('Could not fetch display name, using phone number');
+                console.log('Não foi possível obter o nome de exibição, usando o número de telefone');
             }
             
             // Process custom message with variables
@@ -66,7 +66,7 @@ async function handleJoinEvent(sock, id, participants) {
             } else {
                 // Default message if no custom message is set
                 const now = new Date();
-                const timeString = now.toLocaleString('en-US', {
+                const timeString = now.toLocaleString('pt-BR', {
                     month: '2-digit',
                     day: '2-digit', 
                     year: 'numeric',
@@ -76,7 +76,7 @@ async function handleJoinEvent(sock, id, participants) {
                     hour12: true
                 });
                 
-                finalMessage = `╭╼━≪•𝙽𝙴𝚆 𝙼𝙴𝙼𝙱𝙴𝚁•≫━╾╮\n┃𝚆𝙴𝙻𝙲𝙾𝙼𝙴: @${displayName} 👋\n┃Member count: #${groupMetadata.participants.length}\n┃𝚃𝙸𝙼𝙴: ${timeString}⏰\n╰━━━━━━━━━━━━━━━╯\n\n*@${displayName}* Welcome to *${groupName}*! 🎉\n*Group 𝙳𝙴𝚂𝙲𝚁𝙸𝙿𝚃𝙸𝙾𝙽*\n${groupDesc}\n\n> *ᴘᴏᴡᴇʀᴇᴅ ʙʏ Knight Bot*`;
+                finalMessage = `╭╼━≪•𝙽𝙾𝚅𝙾 𝙼𝙴𝙼𝙱𝚁𝙾•≫━╾╮\n┃𝙱𝙴𝙼 𝚅𝙸𝙽𝙳𝙾: @${displayName} 👋\n┃Contagem de membros: #${groupMetadata.participants.length}\n┃𝙷𝙾𝚁𝙰: ${timeString}⏰\n╰━━━━━━━━━━━━━━━╯\n\n*@${displayName}* Seja bem-vindo(a) ao *${groupName}*! 🎉\n*Descrição do 𝙶𝚁𝚄𝙿𝙾*\n${groupDesc}\n\n> *ᴘᴏᴅᴇʀ ᴅᴏ Knight Bot*`;
             }
             
             // Try to send with image first (always try images)
@@ -89,7 +89,7 @@ async function handleJoinEvent(sock, id, participants) {
                         profilePicUrl = profilePic;
                     }
                 } catch (profileError) {
-                    console.log('Could not fetch profile picture, using default');
+                    console.log('Não foi possível obter a foto de perfil, usando padrão');
                 }
                 
                 // Construct API URL for welcome image
@@ -110,7 +110,7 @@ async function handleJoinEvent(sock, id, participants) {
                     continue; // Skip to next participant
                 }
             } catch (imageError) {
-                console.log('Image generation failed, falling back to text');
+                console.log('Falha na geração da imagem, retornando para texto');
             }
             
             // Send text message (either custom message or fallback)
@@ -120,7 +120,7 @@ async function handleJoinEvent(sock, id, participants) {
                 ...channelInfo
             });
         } catch (error) {
-            console.error('Error sending welcome message:', error);
+            console.error('Erro ao enviar mensagem de boas-vindas:', error);
             // Fallback to text message
             const participantString = typeof participant === 'string' ? participant : (participant.id || participant.toString());
             const user = participantString.split('@')[0];
@@ -133,7 +133,7 @@ async function handleJoinEvent(sock, id, participants) {
                     .replace(/{group}/g, groupName)
                     .replace(/{description}/g, groupDesc);
             } else {
-                fallbackMessage = `Welcome @${user} to ${groupName}! 🎉`;
+                fallbackMessage = `Seja bem-vindo(a) @${user} ao ${groupName}! 🎉`;
             }
             
             await sock.sendMessage(id, {

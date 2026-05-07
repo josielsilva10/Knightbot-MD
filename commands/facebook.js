@@ -9,14 +9,14 @@ async function facebookCommand(sock, chatId, message) {
         
         if (!url) {
             return await sock.sendMessage(chatId, { 
-                text: "Please provide a Facebook video URL.\nExample: .fb https://www.facebook.com/..."
+                text: "Por favor, forneça uma URL de vídeo do Facebook.\nExemplo: .fb https://www.facebook.com/..."
             }, { quoted: message });
         }
 
         // Validate Facebook URL
         if (!url.includes('facebook.com')) {
             return await sock.sendMessage(chatId, { 
-                text: "That is not a Facebook link."
+                text: "Esse não é um link do Facebook."
             }, { quoted: message });
         }
 
@@ -64,9 +64,9 @@ async function facebookCommand(sock, chatId, message) {
                     }
                 }
             } catch (error) {
-                console.error(`Hanggts API failed: ${error.message}`);
+                console.error(`Falha na API Hanggts: ${error.message}`);
             }
-            throw new Error('Hanggts API failed');
+            throw new Error('Falha na API Hanggts');
         }
 
         // Try resolved URL, then fallback to original URL
@@ -93,58 +93,58 @@ async function facebookCommand(sock, chatId, message) {
                 if (data.result.media) {
                     // Prefer HD, fallback to SD
                     fbvid = data.result.media.video_hd || data.result.media.video_sd;
-                    title = data.result.info?.title || data.result.title || data.title || "Facebook Video";
+                    title = data.result.info?.title || data.result.title || data.title || "Vídeo do Facebook";
                 }
                 // Check if result is an object with url
                 else if (typeof data.result === 'object' && data.result.url) {
                     fbvid = data.result.url;
-                    title = data.result.title || data.result.caption || data.title || "Facebook Video";
+                    title = data.result.title || data.result.caption || data.title || "Vídeo do Facebook";
                 } 
                 // Check if result is a string (direct URL)
                 else if (typeof data.result === 'string' && data.result.startsWith('http')) {
                     fbvid = data.result;
-                    title = data.title || "Facebook Video";
+                    title = data.title || "Vídeo do Facebook";
                 }
                 // Check if result has download or video property
                 else if (data.result.download) {
                     fbvid = data.result.download;
-                    title = data.result.title || data.title || "Facebook Video";
+                    title = data.result.title || data.title || "Vídeo do Facebook";
                 } else if (data.result.video) {
                     fbvid = data.result.video;
-                    title = data.result.title || data.title || "Facebook Video";
+                    title = data.result.title || data.title || "Vídeo do Facebook";
                 }
             }
             
             if (!fbvid && data.data) {
                 if (typeof data.data === 'object' && data.data.url) {
                     fbvid = data.data.url;
-                    title = data.data.title || data.data.caption || data.title || "Facebook Video";
+                    title = data.data.title || data.data.caption || data.title || "Vídeo do Facebook";
                 } else if (typeof data.data === 'string' && data.data.startsWith('http')) {
                     fbvid = data.data;
-                    title = data.title || "Facebook Video";
+                    title = data.title || "Vídeo do Facebook";
                 } else if (Array.isArray(data.data) && data.data.length > 0) {
                     // Array format - find best quality
                     const hdVideo = data.data.find(item => (item.quality === 'HD' || item.quality === 'high') && (item.format === 'mp4' || !item.format));
                     const sdVideo = data.data.find(item => (item.quality === 'SD' || item.quality === 'low') && (item.format === 'mp4' || !item.format));
                     fbvid = hdVideo?.url || sdVideo?.url || data.data[0]?.url;
-                    title = hdVideo?.title || sdVideo?.title || data.data[0]?.title || data.title || "Facebook Video";
+                    title = hdVideo?.title || sdVideo?.title || data.data[0]?.title || data.title || "Vídeo do Facebook";
                 } else if (data.data.download) {
                     fbvid = data.data.download;
-                    title = data.data.title || data.title || "Facebook Video";
+                    title = data.data.title || data.title || "Vídeo do Facebook";
                 } else if (data.data.video) {
                     fbvid = data.data.video;
-                    title = data.data.title || data.title || "Facebook Video";
+                    title = data.data.title || data.title || "Vídeo do Facebook";
                 }
             }
             
             if (!fbvid && data.url) {
                 fbvid = data.url;
-                title = data.title || data.caption || "Facebook Video";
+                title = data.title || data.caption || "Vídeo do Facebook";
             }
             
             if (!fbvid && data.download) {
                 fbvid = data.download;
-                title = data.title || "Facebook Video";
+                title = data.title || "Vídeo do Facebook";
             }
             
             if (!fbvid && data.video) {
@@ -153,19 +153,19 @@ async function facebookCommand(sock, chatId, message) {
                 } else if (data.video.url) {
                     fbvid = data.video.url;
                 }
-                title = data.title || data.video.title || "Facebook Video";
+                title = data.title || data.video.title || "Vídeo do Facebook";
             }
         }
 
         if (!fbvid) {
             return await sock.sendMessage(chatId, { 
-                text: '❌ Failed to get video URL from Facebook.\n\nPossible reasons:\n• Video is private or deleted\n• Link is invalid\n• Video is not available for download\n\nPlease try a different Facebook video link.'
+                text: '❌ Falha ao obter a URL do vídeo do Facebook.\n\nPossíveis razões:\n• Vídeo é privado ou foi excluído\n• Link é inválido\n• Vídeo não está disponível para download\n\nPor favor, tente um link diferente de vídeo do Facebook.'
             }, { quoted: message });
         }
 
         // Try URL method first (more reliable)
         try {
-            const caption = title ? `𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗘𝗗 𝗕𝗬 𝗞𝗡𝗜𝗚𝗛𝗧-𝗕𝗢𝗧\n\n📝 Title: ${title}` : "𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗘𝗗 𝗕𝗬 𝗞𝗡𝗜𝗚𝗛𝗧-𝗕𝗢𝗧";
+            const caption = title ? `𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗘𝗗 𝗕𝗬 𝗞𝗡𝗜𝗚𝗛𝗧-𝗕𝗢𝗧\n\n📝 Título: ${title}` : "𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗘𝗗 𝗕𝗬 𝗞𝗡𝗜𝗚𝗛𝗧-𝗕𝗢𝗧";
             
             await sock.sendMessage(chatId, {
                 video: { url: fbvid },
@@ -175,7 +175,7 @@ async function facebookCommand(sock, chatId, message) {
             
             return;
         } catch (urlError) {
-            console.error(`URL method failed: ${urlError.message}`);
+            console.error(`Método URL falhou: ${urlError.message}`);
             
             // Fallback to buffer method
             try {
@@ -195,7 +195,7 @@ async function facebookCommand(sock, chatId, message) {
                     responseType: 'stream',
                     timeout: 60000,
                     headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, como Gecko) Chrome/120.0.0.0 Safari/537.36',
                         'Accept': 'video/mp4,video/*;q=0.9,*/*;q=0.8',
                         'Accept-Language': 'en-US,en;q=0.5',
                         'Referer': 'https://www.facebook.com/'
@@ -212,11 +212,11 @@ async function facebookCommand(sock, chatId, message) {
 
                 // Check if file was downloaded successfully
                 if (!fs.existsSync(tempFile) || fs.statSync(tempFile).size === 0) {
-                    throw new Error('Failed to download video');
+                    throw new Error('Falha ao baixar o vídeo');
                 }
 
                 // Send the video
-                const caption = title ? `𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗘𝗗 𝗕𝗬 𝗞𝗡𝗜𝗚𝗛𝗧-𝗕𝗢𝗧\n\n📝 Title: ${title}` : "𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗘𝗗 𝗕𝗬 𝗞𝗡𝗜𝗚𝗛𝗧-𝗕𝗢𝗧";
+                const caption = title ? `𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗘𝗗 𝗕𝗬 𝗞𝗡𝗜𝗚𝗛𝗧-𝗕𝗢𝗧\n\n📝 Título: ${title}` : "𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗘𝗗 𝗕𝗬 𝗞𝗡𝗜𝗚𝗛𝗧-𝗕𝗢𝗧";
                 
                 await sock.sendMessage(chatId, {
                     video: { url: tempFile },
@@ -228,19 +228,19 @@ async function facebookCommand(sock, chatId, message) {
                 try {
                     fs.unlinkSync(tempFile);
                 } catch (err) {
-                    console.error('Error cleaning up temp file:', err);
+                    console.error('Erro ao limpar arquivo temporário:', err);
                 }
                 return;
             } catch (bufferError) {
-                console.error(`Buffer method also failed: ${bufferError.message}`);
-                throw new Error('Both URL and buffer methods failed');
+                console.error(`Método buffer também falhou: ${bufferError.message}`);
+                throw new Error('Ambos os métodos URL e buffer falharam');
             }
         }
 
     } catch (error) {
-        console.error('Error in Facebook command:', error);
+        console.error('Erro no comando Facebook:', error);
         await sock.sendMessage(chatId, { 
-            text: "An error occurred. API might be down. Error: " + error.message
+            text: "Ocorreu um erro. A API pode estar fora do ar. Erro: " + error.message
         }, { quoted: message });
     }
 }

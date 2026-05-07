@@ -6,12 +6,12 @@ async function tagAllCommand(sock, chatId, senderId, message) {
         
 
         if (!isBotAdmin) {
-            await sock.sendMessage(chatId, { text: 'Please make the bot an admin first.' }, { quoted: message });
+            await sock.sendMessage(chatId, { text: 'Por favor, torne o bot um administrador primeiro.' }, { quoted: message });
             return;
         }
 
         if (!isSenderAdmin) {
-            await sock.sendMessage(chatId, { text: 'Only group admins can use the .tagall command.' }, { quoted: message });
+            await sock.sendMessage(chatId, { text: 'Apenas administradores do grupo podem usar o comando .tagall.' }, { quoted: message });
             return;
         }
 
@@ -20,12 +20,12 @@ async function tagAllCommand(sock, chatId, senderId, message) {
         const participants = groupMetadata.participants;
 
         if (!participants || participants.length === 0) {
-            await sock.sendMessage(chatId, { text: 'No participants found in the group.' });
+            await sock.sendMessage(chatId, { text: 'Nenhum participante encontrado no grupo.' });
             return;
         }
 
         // Create message with each member on a new line
-        let messageText = '🔊 *Hello Everyone:*\n\n';
+        let messageText = '🔊 *Olá a todos:*\n\n';
         participants.forEach(participant => {
             messageText += `@${participant.id.split('@')[0]}\n`; // Add \n for new line
         });
@@ -37,8 +37,8 @@ async function tagAllCommand(sock, chatId, senderId, message) {
         });
 
     } catch (error) {
-        console.error('Error in tagall command:', error);
-        await sock.sendMessage(chatId, { text: 'Failed to tag all members.' });
+        console.error('Erro no comando tagall:', error);
+        await sock.sendMessage(chatId, { text: 'Falha ao marcar todos os membros.' });
     }
 }
 

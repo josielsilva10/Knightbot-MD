@@ -10,7 +10,7 @@ async function setProfilePicture(sock, chatId, msg) {
         
         if (!msg.key.fromMe && !isOwner) {
             await sock.sendMessage(chatId, { 
-                text: '❌ This command is only available for the owner!' 
+                text: '❌ Este comando está disponível apenas para o dono!' 
             });
             return;
         }
@@ -19,7 +19,7 @@ async function setProfilePicture(sock, chatId, msg) {
         const quotedMessage = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
         if (!quotedMessage) {
             await sock.sendMessage(chatId, { 
-                text: '⚠️ Please reply to an image with the .setpp command!' 
+                text: '⚠️ Por favor, responda a uma imagem com o comando .setpp!' 
             });
             return;
         }
@@ -28,7 +28,7 @@ async function setProfilePicture(sock, chatId, msg) {
         const imageMessage = quotedMessage.imageMessage || quotedMessage.stickerMessage;
         if (!imageMessage) {
             await sock.sendMessage(chatId, { 
-                text: '❌ The replied message must contain an image!' 
+                text: '❌ A mensagem respondida deve conter uma imagem!' 
             });
             return;
         }
@@ -59,13 +59,13 @@ async function setProfilePicture(sock, chatId, msg) {
         fs.unlinkSync(imagePath);
 
         await sock.sendMessage(chatId, { 
-            text: '✅ Successfully updated bot profile picture!' 
+            text: '✅ Foto de perfil do bot atualizada com sucesso!' 
         });
 
     } catch (error) {
-        console.error('Error in setpp command:', error);
+        console.error('Erro no comando setpp:', error);
         await sock.sendMessage(chatId, { 
-            text: '❌ Failed to update profile picture!' 
+            text: '❌ Falha ao atualizar a foto de perfil!' 
         });
     }
 }
