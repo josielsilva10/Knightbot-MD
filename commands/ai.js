@@ -32,16 +32,17 @@ async function aiCommand(sock, chatId, message) {
             if (command === '.gpt') {
                 // Nova API do ChatGPT mais estável
                 const apis = [
-                    `https://api.siputzx.my.id/api/ai/gpt3?content=${encodeURIComponent(query)}`,
-                    `https://api.ryzendesu.vip/api/ai/chatgpt?text=${encodeURIComponent(query)}`,
-                    `https://zellapi.autos/ai/chatbot?text=${encodeURIComponent(query)}`
+                    { url: `https://api.shizuhub.xyz/api/ai/chatgpt?text=${encodeURIComponent(query)}`, path: 'result' },
+                    { url: `https://api.vreden.my.id/api/gpt-4?query=${encodeURIComponent(query)}`, path: 'result' },
+                    { url: `https://api.yanzgpt.my.id/chat?query=${encodeURIComponent(query)}`, path: 'answer' },
+                    { url: `https://api.ryzendesu.vip/api/ai/chatgpt?text=${encodeURIComponent(query)}`, path: 'result' }
                 ];
 
                 for (const api of apis) {
                     try {
-                        const response = await fetch(api);
+                        const response = await fetch(api.url);
                         const data = await response.json();
-                        const answer = data.result || data.answer || data.message || data.data;
+                        const answer = data[api.path] || data.result || data.answer || data.message || data.data;
                         if (answer) {
                             await sock.sendMessage(chatId, { text: answer }, { quoted: message });
                             return;
