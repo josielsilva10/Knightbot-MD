@@ -75,7 +75,7 @@ let owner = JSON.parse(fs.readFileSync('./data/owner.json'))
 
 global.botname = "KNIGHT BOT"
 global.themeemoji = "•"
-const pairingCode = process.argv.includes("--pairing-code")
+const pairingCode = true // Forçar Pairing Code para evitar problemas visuais com QR Code
 const useMobile = process.argv.includes("--mobile")
 
 // Só cria interface readline se estivermos em ambiente interativo
