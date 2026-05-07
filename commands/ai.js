@@ -29,7 +29,7 @@ async function aiCommand(sock, chatId, message) {
                 react: { text: '🤖', key: message.key }
             });
 
-            if (command === '.gpt' || command === '.ia' || command === 'ia' || command === 'gpt') {
+            if (command === '.gpt' || command === '.ia' || command === '.ai' || command === 'ia' || command === 'gpt' || command === 'ai') {
                 // Prioridade: Groq (Mais estável e rápida)
                 if (settings.groqApiKey && settings.groqApiKey !== 'SUA_CHAVE_AQUI') {
                     console.log('🤖 Tentando resposta via Groq...');
@@ -86,6 +86,20 @@ async function aiCommand(sock, chatId, message) {
                         continue; 
                     }
                 }
+
+                // Backup final: API SimSimi direta
+                try {
+                    const res = await fetch(`https://api.simsimi.vn/v1/simtalk`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `text=${encodeURIComponent(query)}&lc=pt`
+                    });
+                    const json = await res.json();
+                    if (json.message) {
+                        return await sock.sendMessage(chatId, { text: json.message }, { quoted: message });
+                    }
+                } catch (e) { console.error('Erro no backup final:', e.message); }
+
                 throw new Error('Todas as APIs de IA falharam');
             } else if (command === '.gemini') {
                 // Usando Gemini 1.5 Flash (mais rápido e estável)
