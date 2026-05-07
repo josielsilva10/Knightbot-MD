@@ -32,52 +32,55 @@ async function aiCommand(sock, chatId, message) {
             if (command === '.gpt' || command === '.ia') {
                 // Prioridade: Groq (Mais estável e rápida)
                 if (settings.groqApiKey && settings.groqApiKey !== 'SUA_CHAVE_AQUI') {
+                    console.log('🤖 Tentando resposta via Groq...');
                     try {
-                        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': `Bearer ${settings.groqApiKey}`,
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                model: 'llama3-8b-8192',
-                                messages: [
-                                    { role: 'system', content: 'Você é o Cavaleiro Bot, um assistente prestativo e amigável. Responda sempre em Português do Brasil.' },
-                                    { role: 'user', content: query }
-                                ]
-                            })
+                        const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
+                            model: 'llama3-8b-8192',
+                            messages: [
+                                { role: 'system', content: 'Você é o Cavaleiro Bot, um assistente prestativo e amigável. Responda sempre em Português do Brasil.' },
+                                { role: 'user', content: query }
+                            ]
+                        }, {
+                            headers: { 'Authorization': `Bearer ${settings.groqApiKey}` },
+                            timeout: 15000
                         });
-                        const data = await response.json();
-                        if (data.choices && data.choices[0].message.content) {
-                            return await sock.sendMessage(chatId, { text: data.choices[0].message.content }, { quoted: message });
+
+                        if (response.data.choices && response.data.choices[0].message.content) {
+                            return await sock.sendMessage(chatId, { text: response.data.choices[0].message.content }, { quoted: message });
                         }
-                    } catch (e) { console.error('Erro Groq:', e); }
+                    } catch (e) {
+                        console.error('❌ Erro na Groq:', e.response ? e.response.data : e.message);
+                    }
                 }
 
                 // Backup: APIs Gratuitas
+                console.log('🤖 Tentando APIs de backup...');
                 const apis = [
                     { url: `https://api.popcat.xyz/chatbot?msg=${encodeURIComponent(query)}&name=KnightBot&owner=Josiel`, path: 'response' },
-                    { url: `https://api.simsimi.vn/v1/simtalk`, method: 'POST', body: `text=${encodeURIComponent(query)}&lc=pt`, path: 'message' }
+                    { url: `https://api.simsimi.vn/v1/simtalk`, method: 'POST', data: `text=${encodeURIComponent(query)}&lc=pt`, path: 'message' }
                 ];
 
                 for (const api of apis) {
                     try {
                         let response;
                         if (api.method === 'POST') {
-                            response = await fetch(api.url, {
-                                method: 'POST',
+                            response = await axios.post(api.url, api.data, {
                                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                                body: api.body
+                                timeout: 10000
                             });
                         } else {
-                            response = await fetch(api.url);
+                            response = await axios.get(api.url, { timeout: 10000 });
                         }
-                        const data = await response.json();
+                        
+                        const data = response.data;
                         const answer = data[api.path] || data.result || data.answer || data.message || data.data;
                         if (answer) {
                             return await sock.sendMessage(chatId, { text: answer }, { quoted: message });
                         }
-                    } catch (e) { continue; }
+                    } catch (e) { 
+                        console.error(`❌ Falha na API ${api.url}:`, e.message);
+                        continue; 
+                    }
                 }
                 throw new Error('Todas as APIs de IA falharam');
             } else if (command === '.gemini') {
