@@ -5,7 +5,7 @@ const settings = {
   botOwner: 'Josiel DEV', // Seu nome
   ownerNumber: '5589981109051', // Defina seu número aqui sem o símbolo +, apenas código do país e número sem espaços
   giphyApiKey: 'qnl7ssQChTdPjsKta2Ax2LMaGXz303tq',
-  geminiApiKey: 'SUA_CHAVE_GEMINI_AQUI', // Coloque sua chave do Gemini aqui
+  geminiApiKey: 'AIzaSyBG--5apwiIautGGJzN5M1dhGLxWx1AB2w', // Coloque sua chave do Gemini aqui
   commandMode: "public",
   maxStoreMessages: 20, 
   storeWriteInterval: 10000,
